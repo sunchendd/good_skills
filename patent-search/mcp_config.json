@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "google-patents": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-google-patents"
+      ],
+      "env": {
+        "GOOGLE_PATENTS_API_KEY": "ceac1888ee08e1e41d3ae9a2176c888ad05a85955c8e0580b95b7ae4262a824a"
+      }
+    }
+  }
+}

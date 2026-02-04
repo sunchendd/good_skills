@@ -9,7 +9,7 @@ import json
 import subprocess
 import sys
 from datetime import datetime
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 
 
 class PatentFinder:
@@ -20,23 +20,60 @@ class PatentFinder:
 
     def search_google_patents(self, keywords: str, limit: int = 50) -> List[Dict]:
         """Google Patents 检索"""
-        # 使用 patentsview API 或 Google Patents 搜索
-        query = f"site:patents.google.com {keywords}"
-        print(f"检索 Google Patents: {query}")
+        print(f"检索 Google Patents: {keywords}")
 
-        # 实际使用时可以调用专利数据库 API
-        # 这里提供模拟结果
-        results = self._mock_search("Google Patents", keywords, limit)
-        return results
+        try:
+            # 导入Google Patents搜索模块
+            import sys
+            import os
 
-    def search_uspto(self, keywords: str, start_date: str = None,
-                     end_date: str = None, limit: int = 50) -> List[Dict]:
+            # 添加当前目录到路径
+            sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+            # 动态导入Google Patents搜索
+            from google_patents_search import GooglePatentsSearch
+
+            searcher = GooglePatentsSearch()
+            results = searcher.search(keywords, limit)
+
+            # 转换为兼容格式
+            formatted_results = []
+            for patent in results:
+                formatted_patent = {
+                    "patent_id": patent.get("patent_id", ""),
+                    "title": patent.get("title", ""),
+                    "applicant": ", ".join(patent.get("assignees", [])),
+                    "inventor": ", ".join(patent.get("inventors", [])),
+                    "filing_date": patent.get("filing_date", ""),
+                    "publication_date": patent.get("publication_date", ""),
+                    "abstract": patent.get("abstract", ""),
+                    "ipc_class": patent.get("ipc_classes", []),
+                    "keywords": keywords,
+                    "database": "Google Patents",
+                    "url": patent.get("url", ""),
+                }
+                formatted_results.append(formatted_patent)
+
+            return formatted_results
+
+        except Exception as e:
+            print(f"Google Patents搜索失败: {e}")
+            # 失败时返回模拟结果
+            return self._mock_search("Google Patents", keywords, limit)
+
+    def search_uspto(
+        self,
+        keywords: str,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+        limit: int = 50,
+    ) -> List[Dict]:
         """USPTO 专利检索"""
         query = f'"{keywords}"'
         if start_date:
-            query += f' AND PD >= {start_date}'
+            query += f" AND PD >= {start_date}"
         if end_date:
-            query += f' AND PD <= {end_date}'
+            query += f" AND PD <= {end_date}"
 
         print(f"检索 USPTO: {query}")
 
@@ -66,15 +103,15 @@ class PatentFinder:
             patent = {
                 "patent_id": f"{database[:3].upper()}{2024000000 + i}",
                 "title": f"基于{keywords}的优化方法及系统",
-                "applicant": f"公司{i+1}",
-                "inventor": f"发明人{i+1}",
+                "applicant": f"公司{i + 1}",
+                "inventor": f"发明人{i + 1}",
                 "filing_date": f"2024-{(i % 12) + 1:02d}-{(i % 28) + 1:02d}",
                 "publication_date": f"2025-{(i % 12) + 1:02d}-{(i % 28) + 1:02d}",
                 "abstract": f"本发明涉及{keywords}技术领域，提供了一种...",
                 "ipc_class": [f"G06F9/5{(i % 10)}"],
                 "keywords": keywords,
                 "database": database,
-                "url": f"https://patents.google.com/patent/{database[:3].upper()}{2024000000 + i}"
+                "url": f"https://patents.google.com/patent/{database[:3].upper()}{2024000000 + i}",
             }
             mock_results.append(patent)
 
@@ -97,11 +134,7 @@ class PatentFinder:
             for ipc in patent.get("ipc_class", []):
                 by_ipc[ipc] = by_ipc.get(ipc, 0) + 1
 
-        return {
-            "total": len(patents),
-            "by_database": by_database,
-            "by_ipc": by_ipc
-        }
+        return {"total": len(patents), "by_database": by_database, "by_ipc": by_ipc}
 
     def export_results(self, patents: List[Dict], format: str = "json") -> str:
         """导出检索结果"""
@@ -120,16 +153,24 @@ class PatentFinder:
 def main():
     parser = argparse.ArgumentParser(description="专利检索辅助工具")
     parser.add_argument("--keywords", "-k", help="检索关键词")
-    parser.add_argument("--database", "-d", default="all",
-                        choices=["google", "uspto", "cnipa", "epo", "all"],
-                        help="检索数据库")
+    parser.add_argument(
+        "--database",
+        "-d",
+        default="all",
+        choices=["google", "uspto", "cnipa", "epo", "all"],
+        help="检索数据库",
+    )
     parser.add_argument("--company", "-c", help="特定公司/权利人")
     parser.add_argument("--ipc", "-i", help="IPC分类")
     parser.add_argument("--years", "-y", help="年份范围，格式: 2020-2025")
     parser.add_argument("--limit", "-l", type=int, default=50, help="结果数量限制")
-    parser.add_argument("--export", "-e", default="json",
-                        choices=["json", "csv", "console"],
-                        help="导出格式")
+    parser.add_argument(
+        "--export",
+        "-e",
+        default="json",
+        choices=["json", "csv", "console"],
+        help="导出格式",
+    )
 
     args = parser.parse_args()
 
@@ -161,7 +202,9 @@ def main():
         if db == "google":
             results = finder.search_google_patents(args.keywords, args.limit)
         elif db == "uspto":
-            results = finder.search_uspto(args.keywords, start_date, end_date, args.limit)
+            results = finder.search_uspto(
+                args.keywords, start_date, end_date, args.limit
+            )
         elif db == "cnipa":
             results = finder.search_cnipa(args.keywords, args.limit)
         elif db == "epo":
