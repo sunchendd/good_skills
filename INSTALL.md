@@ -9,7 +9,35 @@
 
 ### Quick Start
 
-The easiest way to install all Good Skills to your AI coding assistants:
+The easiest way to install all Good Skills to your AI coding assistants is using the remote installation script:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/sunchendd/good_skills/main/remote-install.sh | bash
+```
+
+This single command will:
+1. Clone the repository to `~/.good_skills`
+2. Install all skills to all supported platforms using symbolic links
+
+#### Remote Installation Options
+
+```bash
+# Install to specific platforms
+curl -fsSL https://raw.githubusercontent.com/sunchendd/good_skills/main/remote-install.sh | bash -s -- --github-copilot --claude
+
+# Install to current project directory
+curl -fsSL https://raw.githubusercontent.com/sunchendd/good_skills/main/remote-install.sh | bash -s -- --all --project
+
+# Install to custom directory
+curl -fsSL https://raw.githubusercontent.com/sunchendd/good_skills/main/remote-install.sh | bash -s -- --dir ~/my-skills --all
+
+# View all options
+curl -fsSL https://raw.githubusercontent.com/sunchendd/good_skills/main/remote-install.sh | bash -s -- --help
+```
+
+### Local Installation
+
+If you prefer to clone the repository manually:
 
 ```bash
 git clone https://github.com/sunchendd/good_skills.git
@@ -115,7 +143,35 @@ A: The script installs all skills together. To install individual skills, use ma
 
 ### 快速开始
 
-最简单的方式，一键安装所有 Good Skills 到您的 AI 编程助手：
+最简单的方式，使用远程安装脚本一键安装所有 Good Skills 到您的 AI 编程助手：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/sunchendd/good_skills/main/remote-install.sh | bash
+```
+
+这条命令将：
+1. 将仓库克隆到 `~/.good_skills`
+2. 使用符号链接将所有技能安装到所有支持的平台
+
+#### 远程安装选项
+
+```bash
+# 安装到特定平台
+curl -fsSL https://raw.githubusercontent.com/sunchendd/good_skills/main/remote-install.sh | bash -s -- --github-copilot --claude
+
+# 安装到当前项目目录
+curl -fsSL https://raw.githubusercontent.com/sunchendd/good_skills/main/remote-install.sh | bash -s -- --all --project
+
+# 安装到自定义目录
+curl -fsSL https://raw.githubusercontent.com/sunchendd/good_skills/main/remote-install.sh | bash -s -- --dir ~/my-skills --all
+
+# 查看所有选项
+curl -fsSL https://raw.githubusercontent.com/sunchendd/good_skills/main/remote-install.sh | bash -s -- --help
+```
+
+### 本地安装
+
+如果您希望手动克隆仓库：
 
 ```bash
 git clone https://github.com/sunchendd/good_skills.git
