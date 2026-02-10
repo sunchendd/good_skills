@@ -6,13 +6,60 @@
 
 您可以参照以下说明，将本项目中的 Skills 集成到主流的 AI 编程工具中：
 
-### 1. 快速安装工具 (推荐)
-使用 **add-skill** 工具可以一键将 Skill 安装到多个平台，自动识别正确的路径。
+### 1. 一键安装脚本 (推荐)
+使用本仓库提供的安装脚本，可以一次性将所有 Skills 安装到多个 AI 编程工具平台。安装脚本使用**符号链接（symbolic links）**的方式，确保：
+- ✅ 兼容已有的 Skills 安装
+- ✅ 自动识别并跳过已存在的 Skills
+- ✅ Skills 更新会自动同步到所有平台
+- ✅ 支持全局安装或项目级安装
+
+#### 安装到所有平台
+```bash
+git clone https://github.com/sunchendd/good_skills.git
+cd good_skills
+./install.sh --all
+```
+
+#### 安装到特定平台
+```bash
+# 安装到 GitHub Copilot
+./install.sh --github-copilot
+
+# 安装到 Claude Code
+./install.sh --claude
+
+# 安装到多个平台
+./install.sh --github-copilot --claude --opencode --antigravity
+
+# 安装到项目目录（而非全局）
+./install.sh --all --project
+```
+
+#### 卸载
+```bash
+# 从所有平台卸载
+./uninstall.sh --all
+
+# 从特定平台卸载
+./uninstall.sh --github-copilot --claude
+```
+
+#### 支持的平台
+- **GitHub Copilot** - `~/.copilot/skills/`
+- **Claude Code** - `~/.claude/skills/`
+- **OpenCode** - `~/.config/opencode/skill/`
+- **Antigravity** - `~/.gemini/antigravity/skills/`
+- **Cursor** - `~/.cursor/skills/`
+- **Windsurf** - `~/.codeium/windsurf/skills/`
+- **Trae** - 需要通过设置界面手动配置
+
+### 2. 使用 npx add-skill 工具
+使用 **add-skill** 工具可以一键将单个 Skill 安装到多个平台，自动识别正确的路径。
 ```bash
 npx add-skill sunchendd/good_skills/<skill-name>
 ```
 
-### 2. 各平台手动安装路径
+### 3. 各平台手动安装路径
 
 | 工具  | 项目安装路径 (Project)          | 个人安装路径 (Global)                                |
 | :--- | :--- | :--- |
