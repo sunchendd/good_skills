@@ -46,7 +46,6 @@ Options:
     --antigravity       Install to Antigravity (~/.gemini/antigravity/skills/)
     --cursor            Install to Cursor (~/.cursor/skills/)
     --windsurf          Install to Windsurf (~/.codeium/windsurf/skills/)
-    --trae              Install to Trae (global configuration required)
     --global            Install globally (default)
     --project           Install to current project directory
     -h, --help          Show this help message
@@ -56,6 +55,9 @@ Examples:
     $0 --github-copilot         # Install to GitHub Copilot only
     $0 --claude --opencode      # Install to Claude and OpenCode
     $0 --all --project          # Install to all platforms in project directory
+
+Note: Trae requires manual configuration via Settings > Rules and Skills.
+      You can manually copy or symlink skills to .trae/skills/ in your project.
 
 EOF
 }
@@ -117,10 +119,6 @@ while [[ $# -gt 0 ]]; do
             ;;
         --windsurf)
             PLATFORMS+=("windsurf")
-            shift
-            ;;
-        --trae)
-            print_warning "Trae requires manual configuration via Settings > Rules and Skills > Global Skills"
             shift
             ;;
         --global)

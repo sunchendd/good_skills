@@ -175,8 +175,8 @@ remove_symlink() {
     # Check if it's a symlink
     if [ -L "$target" ]; then
         local existing_target=$(readlink "$target")
-        # Only remove if it points to our source
-        if [[ "$existing_target" == "$source" ]] || [[ "$existing_target" == /* && "$existing_target" == "$source" ]]; then
+        # Only remove if it points to our source (compare absolute paths)
+        if [[ "$existing_target" == "$source" ]]; then
             rm "$target"
             print_success "Removed '$skill_name'"
             return 0
