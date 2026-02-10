@@ -18,7 +18,7 @@ npx add-skill sunchendd/good_skills/<skill-name>
 | :--- | :--- | :--- |
 | **Claude Code** | `.claude/skills/<name>/SKILL.md` | `~/.claude/skills/<name>/SKILL.md`           |
 | **GitHub Copilot** | `.github/skills/<name>/SKILL.md` | `~/.copilot/skills/<name>/SKILL.md`          |
-| **Trae** | `.trae/skills/<name>/SKILL.md`     | 设置 &gt; 规则和技能 &gt; 全局技能                    |
+| **Trae** | `.trae/skills/<name>/SKILL.md`     | 设置 > 规则和技能 > 全局技能                    |
 | **Cursor** | `.cursor/skills/<name>/SKILL.md`   | `~/.cursor/skills/<name>/SKILL.md`           |
 | **Windsurf** | `.windsurf/skills/<name>/SKILL.md` | `~/.codeium/windsurf/skills/<name>/SKILL.md` |
 | **OpenCode** | `.opencode/skill/<name>/SKILL.md`  | `~/.config/opencode/skill/<name>/SKILL.md`   |
@@ -109,8 +109,8 @@ npx add-skill sunchendd/good_skills/<skill-name>
 - **[patent-specialist](patent-specialist/)**: 专利专家 Agent
 
 ### 🎤 音频处理
-- **[edge-tts](i3130002/edge-tts/)**: 使用 Microsoft Edge TTS 服务进行文本转语音
-- **[faster-whisper](theplasmak/faster-whisper/)**: 本地语音转文字，比 OpenAI Whisper 快 4-6 倍
+- **[edge-tts](i3130002/edge-tts/)**: 使用 Microsoft Edge TTS 服务进行文本转语音（作者：i3130002）
+- **[faster-whisper](theplasmak/faster-whisper/)**: 本地语音转文字，比 OpenAI Whisper 快 4-6 倍（作者：theplasmak）
 
 ---
 
