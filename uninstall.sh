@@ -43,6 +43,7 @@ Options:
     --github-copilot    Uninstall from GitHub Copilot
     --claude            Uninstall from Claude Code
     --opencode          Uninstall from OpenCode
+    --openclaw          Uninstall from OpenClaw
     --antigravity       Uninstall from Antigravity
     --cursor            Uninstall from Cursor
     --windsurf          Uninstall from Windsurf
@@ -63,6 +64,7 @@ declare -A GLOBAL_PATHS=(
     ["github-copilot"]="$HOME/.copilot/skills"
     ["claude"]="$HOME/.claude/skills"
     ["opencode"]="$HOME/.config/opencode/skill"
+    ["openclaw"]="$HOME/.openclaw/skills"
     ["antigravity"]="$HOME/.gemini/antigravity/skills"
     ["cursor"]="$HOME/.cursor/skills"
     ["windsurf"]="$HOME/.codeium/windsurf/skills"
@@ -72,6 +74,7 @@ declare -A PROJECT_PATHS=(
     ["github-copilot"]=".github/skills"
     ["claude"]=".claude/skills"
     ["opencode"]=".opencode/skill"
+    ["openclaw"]=".openclaw/skills"
     ["antigravity"]=".agent/skills"
     ["cursor"]=".cursor/skills"
     ["windsurf"]=".windsurf/skills"
@@ -103,6 +106,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --opencode)
             PLATFORMS+=("opencode")
+            shift
+            ;;
+        --openclaw)
+            PLATFORMS+=("openclaw")
             shift
             ;;
         --antigravity)
@@ -139,7 +146,7 @@ done
 
 # If --all is specified, add all platforms
 if [ "$UNINSTALL_ALL" = true ]; then
-    PLATFORMS=("github-copilot" "claude" "opencode" "antigravity" "cursor" "windsurf")
+    PLATFORMS=("github-copilot" "claude" "opencode" "openclaw" "antigravity" "cursor" "windsurf")
 fi
 
 # Check if any platforms are selected

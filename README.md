@@ -36,6 +36,14 @@ cd good_skills
 ./install.sh --all
 ```
 
+技能会安装到默认目录 `~/.agent/skills/`，然后创建符号链接到各个平台。
+
+#### 自定义默认目录
+```bash
+# 使用自定义目录作为基础
+./install.sh --all --default-dir ~/my-skills
+```
+
 #### 本地克隆安装到特定平台
 ```bash
 # 安装到 GitHub Copilot
@@ -45,7 +53,7 @@ cd good_skills
 ./install.sh --claude
 
 # 安装到多个平台
-./install.sh --github-copilot --claude --opencode --antigravity
+./install.sh --github-copilot --claude --opencode --openclaw
 
 # 安装到项目目录（而非全局）
 ./install.sh --all --project
@@ -60,14 +68,37 @@ cd good_skills
 ./uninstall.sh --github-copilot --claude
 ```
 
+#### 更新
+```bash
+# 更新所有平台（添加新技能，修复损坏的链接）
+./update.sh --all
+
+# 仅添加缺失的技能（不修改现有链接）
+./update.sh --all --add-missing
+
+# 更新特定平台
+./update.sh --openclaw
+
+# 预览将要进行的更改（不实际执行）
+./update.sh --all --dry-run
+```
+
+更新功能会：
+- 添加当前仓库中存在但目标平台缺失的新技能
+- 修复指向 `~/.good_skills/` 的损坏链接
+- 保留用户自定义的外部技能和真实目录（不覆盖）
+
 #### 支持的平台
 - **GitHub Copilot** - `~/.copilot/skills/`
 - **Claude Code** - `~/.claude/skills/`
 - **OpenCode** - `~/.config/opencode/skill/`
-- **Antigravity** - `~/.gemini/antigravity/skills/`
+- **OpenClaw** - `~/.openclaw/skills/` 或 `~/clawd/skills/`
+- **Antigravity** - `~/.agent/skills/`（默认基础目录）
 - **Cursor** - `~/.cursor/skills/`
 - **Windsurf** - `~/.codeium/windsurf/skills/`
 - **Trae** - 需要通过设置界面手动配置
+
+**说明**：默认情况下，所有技能会安装到 `~/.agent/skills/` 作为中央仓库，其他平台（如 Copilot、Claude等）会从该目录创建符号链接。这样可以确保所有平台共享同一套技能。
 
 ### 3. 使用 npx add-skill 工具
 使用 **add-skill** 工具可以一键将单个 Skill 安装到多个平台，自动识别正确的路径。
@@ -81,10 +112,11 @@ npx add-skill sunchendd/good_skills/<skill-name>
 | :--- | :--- | :--- |
 | **Claude Code** | `.claude/skills/<name>/SKILL.md` | `~/.claude/skills/<name>/SKILL.md`           |
 | **GitHub Copilot** | `.github/skills/<name>/SKILL.md` | `~/.copilot/skills/<name>/SKILL.md`          |
+| **OpenCode** | `.opencode/skill/<name>/SKILL.md`  | `~/.config/opencode/skill/<name>/SKILL.md`   |
+| **OpenClaw** | `.openclaw/skills/<name>/SKILL.md` | `~/.openclaw/skills/<name>/SKILL.md` 或 `~/clawd/skills/<name>/SKILL.md` |
 | **Trae** | `.trae/skills/<name>/SKILL.md`     | 设置 > 规则和技能 > 全局技能                    |
 | **Cursor** | `.cursor/skills/<name>/SKILL.md`   | `~/.cursor/skills/<name>/SKILL.md`           |
 | **Windsurf** | `.windsurf/skills/<name>/SKILL.md` | `~/.codeium/windsurf/skills/<name>/SKILL.md` |
-| **OpenCode** | `.opencode/skill/<name>/SKILL.md`  | `~/.config/opencode/skill/<name>/SKILL.md`   |
 | **Antigravity** | `.agent/skills/<name>/SKILL.md`   | `~/.gemini/antigravity/skills/<name>/SKILL.md` |
 
 ---

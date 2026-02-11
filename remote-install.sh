@@ -38,7 +38,7 @@ BRANCH="main"
 # Parse arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --github-copilot|--claude|--opencode|--antigravity|--cursor|--windsurf)
+        --github-copilot|--claude|--opencode|--openclaw|--antigravity|--cursor|--windsurf)
             INSTALL_ARGS="$1"
             shift
             ;;
@@ -75,6 +75,7 @@ Options:
     --github-copilot    Install to GitHub Copilot only
     --claude            Install to Claude Code only
     --opencode          Install to OpenCode only
+    --openclaw          Install to OpenClaw only
     --antigravity       Install to Antigravity only
     --cursor            Install to Cursor only
     --windsurf          Install to Windsurf only

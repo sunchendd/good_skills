@@ -103,6 +103,29 @@ To remove installed skills:
 ./uninstall.sh --github-copilot --claude
 ```
 
+### Update
+
+To update existing installations with new skills and fix broken links:
+
+```bash
+# Update all platforms
+./update.sh --all
+
+# Only add missing skills (don't modify existing links)
+./update.sh --all --add-missing
+
+# Update specific platform
+./update.sh --openclaw
+
+# Preview changes without making them
+./update.sh --all --dry-run
+```
+
+The update function will:
+- Add new skills from the repository that are missing in target platforms
+- Fix broken links that point to `~/.good_skills/`
+- Preserve external skills and real directories (won't overwrite them)
+
 ### Key Features
 
 - **Symbolic Links**: Uses symbolic links instead of copying files, so updates to skills in the repository automatically reflect in all installations
@@ -236,6 +259,29 @@ cd /path/to/your/project
 # 从特定平台卸载
 ./uninstall.sh --github-copilot --claude
 ```
+
+### 更新
+
+更新现有安装，添加新技能并修复损坏的链接：
+
+```bash
+# 更新所有平台
+./update.sh --all
+
+# 仅添加缺失的技能（不修改现有链接）
+./update.sh --all --add-missing
+
+# 更新特定平台
+./update.sh --openclaw
+
+# 预览将要进行的更改（不实际执行）
+./update.sh --all --dry-run
+```
+
+更新功能会：
+- 添加当前仓库中存在但目标平台缺失的新技能
+- 修复指向 `~/.good_skills/` 的损坏链接
+- 保留用户自定义的外部技能和真实目录（不覆盖）
 
 ### 主要特性
 
