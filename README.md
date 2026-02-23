@@ -154,7 +154,9 @@ npx add-skill sunchendd/good_skills/<skill-name>
 
 ## 现有 Skills 概览
 
-本仓库包含 35+ 个专业技能，涵盖多个领域：
+本仓库包含 49+ 个专业技能（包括从 [dev-agent-skills](https://github.com/fvadicamo/dev-agent-skills) 集成的技能），涵盖多个领域：
+
+> **集成说明**: 本项目已集成 [fvadicamo/dev-agent-skills](https://github.com/fvadicamo/dev-agent-skills) 的 Git 和 GitHub 工作流技能，遵循 Conventional Commits 规范。
 
 ### 🤖 AI/ML 推理与测试
 - **[models-test](models-test/)**: 大模型的推理性能（vLLM、Mindie）和精度测试框架
@@ -169,6 +171,12 @@ npx add-skill sunchendd/good_skills/<skill-name>
 - **[skill-creator](skill-creator/)**: 创建和优化新 Skill 的指导手册
 - **[find-skills](find-skills/)**: 帮助用户发现和安装 Agent 技能
 - **[git-advanced-workflows](git-advanced-workflows/)**: 高级 Git 工作流（rebase、cherry-pick、bisect、worktrees 等）
+
+### 🔧 Git & GitHub 工作流 (来自 dev-agent-skills)
+- **[git-commit](git-commit/)**: 遵循 Conventional Commits 格式创建 Git 提交
+- **[github-pr-creation](github-pr-creation/)**: 创建 PR，包含验证和任务跟踪
+- **[github-pr-review](github-pr-review/)**: 处理 PR 审查评论和反馈
+- **[github-pr-merge](github-pr-merge/)**: 验证后合并 PR
 
 ### 📝 文档处理
 - **[docx](docx/)**: Word 文档创建、编辑和分析，支持修订跟踪和注释
