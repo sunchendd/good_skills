@@ -1,0 +1,15 @@
+{
+  "name": "git-advanced-workflows",
+  "version": "1.0.0",
+  "description": "Master advanced Git workflows including rebasing, cherry-picking, bisect, worktrees",
+  "author": "good-skills",
+  "tags": [
+    "git",
+    "workflow",
+    "advanced"
+  ],
+  "platforms": [
+    "all"
+  ],
+  "dependencies": []
+}

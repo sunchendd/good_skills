@@ -1,0 +1,15 @@
+{
+  "name": "serpapi-search",
+  "version": "1.0.0",
+  "description": "Perform Google searches and retrieve structured search results using SerpAPI",
+  "author": "good-skills",
+  "tags": [
+    "search",
+    "google",
+    "serpapi"
+  ],
+  "platforms": [
+    "all"
+  ],
+  "dependencies": []
+}

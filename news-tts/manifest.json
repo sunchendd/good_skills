@@ -1,0 +1,16 @@
+{
+  "name": "news-tts",
+  "version": "1.0.0",
+  "description": "Generate a short spoken news summary (TTS) and send as Telegram voice message",
+  "author": "good-skills",
+  "tags": [
+    "tts",
+    "news",
+    "telegram",
+    "audio"
+  ],
+  "platforms": [
+    "all"
+  ],
+  "dependencies": []
+}

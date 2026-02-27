@@ -1,0 +1,17 @@
+{
+  "name": "vllm-ascend-profiler-diff",
+  "version": "1.0.0",
+  "description": "vLLM Ascend profiler diff analysis and optimization",
+  "author": "good-skills",
+  "tags": [
+    "ai",
+    "ml",
+    "vllm",
+    "ascend",
+    "profiling"
+  ],
+  "platforms": [
+    "all"
+  ],
+  "dependencies": []
+}

@@ -1,0 +1,16 @@
+{
+  "name": "remotion-best-practices",
+  "version": "1.0.0",
+  "description": "Best practices for Remotion - Video creation in React",
+  "author": "good-skills",
+  "tags": [
+    "remotion",
+    "react",
+    "video",
+    "best-practices"
+  ],
+  "platforms": [
+    "all"
+  ],
+  "dependencies": []
+}

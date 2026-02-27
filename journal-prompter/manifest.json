@@ -1,0 +1,15 @@
+{
+  "name": "journal-prompter",
+  "version": "1.0.0",
+  "description": "Daily journaling prompts and frameworks for reflection, growth, and clarity",
+  "author": "good-skills",
+  "tags": [
+    "journal",
+    "writing",
+    "productivity"
+  ],
+  "platforms": [
+    "all"
+  ],
+  "dependencies": []
+}

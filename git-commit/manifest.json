@@ -1,0 +1,16 @@
+{
+  "name": "git-commit",
+  "version": "1.0.0",
+  "description": "Creates git commits following Conventional Commits format with type/scope/subject",
+  "author": "good-skills",
+  "tags": [
+    "git",
+    "commit",
+    "conventional-commits",
+    "workflow"
+  ],
+  "platforms": [
+    "all"
+  ],
+  "dependencies": []
+}

@@ -1,0 +1,15 @@
+{
+  "name": "bili-fetch",
+  "version": "1.0.0",
+  "description": "Find B站 videos by keyword, fetch metadata and thumbnails",
+  "author": "good-skills",
+  "tags": [
+    "bilibili",
+    "video",
+    "search"
+  ],
+  "platforms": [
+    "all"
+  ],
+  "dependencies": []
+}

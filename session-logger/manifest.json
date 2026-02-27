@@ -1,0 +1,15 @@
+{
+  "name": "session-logger",
+  "version": "1.0.0",
+  "description": "Saves conversation history to session log files",
+  "author": "good-skills",
+  "tags": [
+    "session",
+    "logging",
+    "conversation"
+  ],
+  "platforms": [
+    "all"
+  ],
+  "dependencies": []
+}

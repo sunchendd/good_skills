@@ -1,0 +1,15 @@
+{
+  "name": "copywriting",
+  "version": "1.0.0",
+  "description": "Write, rewrite, or improve marketing copy for any page",
+  "author": "good-skills",
+  "tags": [
+    "writing",
+    "marketing",
+    "copy"
+  ],
+  "platforms": [
+    "all"
+  ],
+  "dependencies": []
+}

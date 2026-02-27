@@ -1,0 +1,16 @@
+{
+  "name": "github-pr-review",
+  "version": "1.0.0",
+  "description": "Handles PR review comments and feedback resolution",
+  "author": "good-skills",
+  "tags": [
+    "git",
+    "github",
+    "pr",
+    "review"
+  ],
+  "platforms": [
+    "all"
+  ],
+  "dependencies": []
+}

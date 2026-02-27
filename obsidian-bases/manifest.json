@@ -1,0 +1,15 @@
+{
+  "name": "obsidian-bases",
+  "version": "1.0.0",
+  "description": "Create and edit Obsidian Bases (.base files) with views, filters, formulas",
+  "author": "good-skills",
+  "tags": [
+    "obsidian",
+    "database",
+    "notes"
+  ],
+  "platforms": [
+    "all"
+  ],
+  "dependencies": []
+}

@@ -1,0 +1,15 @@
+{
+  "name": "obsidian-markdown",
+  "version": "1.0.0",
+  "description": "Create and edit Obsidian Flavored Markdown with wikilinks, callouts, properties",
+  "author": "good-skills",
+  "tags": [
+    "obsidian",
+    "markdown",
+    "notes"
+  ],
+  "platforms": [
+    "all"
+  ],
+  "dependencies": []
+}

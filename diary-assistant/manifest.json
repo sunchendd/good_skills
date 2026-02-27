@@ -1,0 +1,15 @@
+{
+  "name": "diary-assistant",
+  "version": "1.0.0",
+  "description": "Use when user wants to write diary entries or daily logs (macOS)",
+  "author": "good-skills",
+  "tags": [
+    "diary",
+    "macos",
+    "productivity"
+  ],
+  "platforms": [
+    "claude"
+  ],
+  "dependencies": []
+}

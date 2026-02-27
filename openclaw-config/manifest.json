@@ -1,0 +1,15 @@
+{
+  "name": "openclaw-config",
+  "version": "1.0.0",
+  "description": "Manage OpenClaw bot configuration - channels, agents, security, and autopilot",
+  "author": "good-skills",
+  "tags": [
+    "openclaw",
+    "configuration",
+    "bot"
+  ],
+  "platforms": [
+    "all"
+  ],
+  "dependencies": []
+}

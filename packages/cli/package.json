@@ -1,0 +1,33 @@
+{
+  "name": "@good-skills/cli",
+  "version": "0.1.0",
+  "description": "CLI package manager for Good Skills - install, update, and manage AI agent skills",
+  "main": "src/index.js",
+  "bin": {
+    "good-skills": "./bin/good-skills.js"
+  },
+  "scripts": {
+    "test": "node --test src/**/*.test.js"
+  },
+  "keywords": [
+    "ai",
+    "skills",
+    "agent",
+    "claude",
+    "copilot",
+    "cli"
+  ],
+  "author": "good-skills",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "commander": "^12.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sunchendd/good_skills.git",
+    "directory": "packages/cli"
+  }
+}

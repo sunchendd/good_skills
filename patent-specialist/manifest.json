@@ -1,0 +1,16 @@
+{
+  "name": "patent-specialist",
+  "version": "1.0.0",
+  "description": "Expert patent specialist for writing high-quality patent disclosures",
+  "author": "good-skills",
+  "tags": [
+    "patent",
+    "writing",
+    "legal",
+    "ip"
+  ],
+  "platforms": [
+    "all"
+  ],
+  "dependencies": []
+}

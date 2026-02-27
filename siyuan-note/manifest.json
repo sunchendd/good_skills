@@ -1,0 +1,15 @@
+{
+  "name": "siyuan-note",
+  "version": "1.0.0",
+  "description": "SiYuan Note API integration for managing personal knowledge base",
+  "author": "good-skills",
+  "tags": [
+    "siyuan",
+    "notes",
+    "knowledge-base"
+  ],
+  "platforms": [
+    "all"
+  ],
+  "dependencies": []
+}

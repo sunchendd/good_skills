@@ -1,0 +1,15 @@
+{
+  "name": "skill-creator",
+  "version": "1.0.0",
+  "description": "Guide for creating effective skills",
+  "author": "good-skills",
+  "tags": [
+    "skills",
+    "development",
+    "guide"
+  ],
+  "platforms": [
+    "all"
+  ],
+  "dependencies": []
+}

@@ -1,0 +1,15 @@
+{
+  "name": "archive-conversation",
+  "version": "1.0.0",
+  "description": "Create analytical archival summaries of AI conversations",
+  "author": "good-skills",
+  "tags": [
+    "conversation",
+    "archive",
+    "documentation"
+  ],
+  "platforms": [
+    "all"
+  ],
+  "dependencies": []
+}
