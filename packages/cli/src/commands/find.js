@@ -43,7 +43,7 @@ async function findCommand(query) {
       if (skill.description) {
         console.log(`  └ ${skill.description.substring(0, 80)}`);
       }
-      console.log(`  └ Install: npx @good-skills/cli install ${skill.name}\n`);
+      console.log(`  └ Install: npx good-skills install ${skill.name}\n`);
     }
   }
 
@@ -65,7 +65,7 @@ async function findCommand(query) {
     console.log(`No skills found for "${query}".`);
     console.log('\nTips:');
     console.log('  • Try different keywords (e.g., "react" instead of "reactjs")');
-    console.log('  • Browse all skills: npx @good-skills/cli list');
+    console.log('  • Browse all skills: npx good-skills list');
     console.log('  • Browse skills.sh: https://skills.sh/\n');
   }
 }

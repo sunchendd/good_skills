@@ -1,5 +1,5 @@
 {
-  "name": "@good-skills/cli",
+  "name": "good-skills",
   "version": "0.1.0",
   "description": "CLI package manager for Good Skills - install, update, and manage AI agent skills",
   "main": "src/index.js",

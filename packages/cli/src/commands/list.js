@@ -22,8 +22,8 @@ async function listCommand(options) {
     console.log(`  ${skill.name.padEnd(36)} ${skill.version.padEnd(10)} ${tags}`);
   }
 
-  console.log(`\nInstall: npx @good-skills/cli install <skill-name>`);
-  console.log(`Filter:  npx @good-skills/cli list --tag <tag>\n`);
+  console.log(`\nInstall: npx good-skills install <skill-name>`);
+  console.log(`Filter:  npx good-skills list --tag <tag>\n`);
 }
 
 module.exports = { listCommand };

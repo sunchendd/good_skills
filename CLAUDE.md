@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Good Skills is a comprehensive collection of AI agent skills for various platforms (Claude Code, GitHub Copilot, OpenCode, OpenClaw, Cursor, Windsurf, etc.). It includes both original skills and integrated skills from the dev-agent-skills project.
 
-The project also includes **`@good-skills/cli`** (`packages/cli/`) — an NPM CLI tool for managing skill installation, updates, and discovery.
+The project also includes **`good-skills`** (`packages/cli/`) — an NPM CLI tool for managing skill installation, updates, and discovery.
 
 ## Skill Trigger Index
 
@@ -136,7 +136,7 @@ Integrated from [fvadicamo/dev-agent-skills](https://github.com/fvadicamo/dev-ag
 .claude-plugin/
   marketplace.json        # Plugin registry from dev-agent-skills
 packages/
-  cli/                    # @good-skills/cli NPM package
+  cli/                    # good-skills NPM package
     src/
       index.js            # CLI entry (Commander.js)
       commands/           # install, update, status, list, find
@@ -189,28 +189,28 @@ When creating or editing skills, follow these patterns:
 
 ```bash
 # Install a specific skill
-npx @good-skills/cli install git-commit
+npx good-skills install git-commit
 
 # Install to specific platform
-npx @good-skills/cli install git-commit --platform claude
+npx good-skills install git-commit --platform claude
 
 # Install all skills
-npx @good-skills/cli install --all
+npx good-skills install --all
 
 # Update all installed skills
-npx @good-skills/cli update --all
+npx good-skills update --all
 
 # Check for updates
-npx @good-skills/cli update --check
+npx good-skills update --check
 
 # See installed skills
-npx @good-skills/cli status
+npx good-skills status
 
 # Search skills
-npx @good-skills/cli find "pr review"
+npx good-skills find "pr review"
 
 # List all available skills
-npx @good-skills/cli list --tag git
+npx good-skills list --tag git
 ```
 
 ### Shell Scripts (Legacy)
