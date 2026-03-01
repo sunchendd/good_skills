@@ -1,0 +1,5 @@
+openai
+httpx
+markdown
+beautifulsoup4
+feedparser

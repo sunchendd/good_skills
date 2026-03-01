@@ -1,0 +1,21 @@
+# 每日早报系统依赖包
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+feedparser>=6.0.10
+schedule>=1.2.0
+python-dateutil>=2.8.2
+pytz>=2023.3
+jinja2>=3.1.2
+markdown>=3.4.4
+python-dotenv>=1.0.0
+lxml>=4.9.0
+
+# 邮件发送依赖
+openai>=1.0.0
+
+# 定时任务依赖
+schedule>=1.2.0
+
+# 加密货币监控依赖
+websocket-client>=1.6.0
+httpx>=0.24.0

@@ -1,0 +1,15 @@
+{
+  "vllm_ascend_latest_release": "v0.15.0rc1",
+  "deepseek_known_repos": [
+    "DeepSeek-V3.2-Exp",
+    "DualPipe",
+    "LPLB",
+    "EPLB",
+    "Engram",
+    "3FS",
+    "DeepSeek-OCR",
+    "DeepSeek-Prover-V2",
+    "DeepSeek-Math-V2",
+    "DeepSeek-OCR-2"
+  ]
+}
