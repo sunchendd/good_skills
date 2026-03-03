@@ -118,6 +118,24 @@ Use this table to precisely match user requests to skills. Invoke the skill when
 | `openclaw-config` | "OpenClaw 配置", "OpenClaw bot", "autopilot settings" | Non-OpenClaw platforms |
 | `bili-fetch` / `bili-grabber` | "B站视频", "Bilibili", "fetch bili" | Non-Bilibili video |
 
+### Daily & Personal
+
+| Skill | Invoke when user says | Do NOT use when |
+|-------|----------------------|-----------------|
+| `super-wardrobe` | "今天穿什么", "穿搭建议", "帮我搭配衣服", "wardrobe", "衣橱" | 只查询天气不需要穿搭 |
+| `super-fitness` | "今天健身", "运动计划", "减脂建议", "每日健身打卡", "fitness plan" | 泛泛健康咨询 |
+| `vibe-daily` | "AI 编程工具动态", "Claude Code 有什么更新", "vibe coding 资讯", "今日 vibe coding" | 泛科技新闻（用 daily-newsletter）|
+| `daily-digest` | "每日日志汇总", "今日汇总", "daily digest", "汇总今天所有 skill 输出" | 单个 skill 的输出 |
+| `daily-newsletter` | "科技早报", "每日新闻", "RSS 聚合", "daily newsletter", "今日科技资讯" | 单主题搜索 |
+| `bili-daily` | "B站 AI 视频精选", "今日 B 站", "bili daily" | 搜索特定 B 站视频（用 `bili-fetch`）|
+| `arxiv-daily` | "今日 arXiv 论文", "AI 论文精选", "每日论文推送" | 搜索特定论文 |
+| `weekly-report` | "周报", "本周工作总结", "weekly report", "自动生成周报" | 每日汇报 |
+| `github-watcher` | "GitHub 仓库监控", "版本更新通知", "监控 vllm 发布" | 手动查看 PR/commits |
+| `chess-advisor` | "象棋", "棋盘分析", "chess", "下一步怎么走", "分析棋局", 上传棋盘图片 | 国际象棋（非中国象棋）|
+| `tts-skill` | "把这段文字转成语音", "TTS 生成", "朗读这段话", "语音合成 MP3" | 新闻播报推送（用 `news-tts`）|
+| `wuyu-xiaohongshu` | "无语哥", "奇葩新闻文案", "小红书无语内容", "生成无语文案" | 普通小红书内容创作 |
+| `xhs-skill` | "小红书检索", "发布小红书", "xhs MCP", "搜索小红书内容" | 生成小红书文案（用 `wuyu-xiaohongshu`）|
+
 ### Skills from dev-agent-skills
 
 Integrated from [fvadicamo/dev-agent-skills](https://github.com/fvadicamo/dev-agent-skills):
