@@ -27,8 +27,12 @@ def fetch_arxiv_papers(max_results=MAX_FETCH):
     url = (f"http://export.arxiv.org/api/query?search_query={cat_query}"
            f"&start=0&max_results={max_results}&sortBy=submittedDate&sortOrder=descending")
     logger.info(f"📡 抓取 arXiv 论文 (max={max_results})...")
-    req = urllib.request.urlopen(url, timeout=60)
-    data = req.read()
+    try:
+        req = urllib.request.urlopen(url, timeout=60)
+        data = req.read()
+    except Exception as e:
+        logger.error(f"arXiv API 请求失败: {e}")
+        return []
     ns = {'atom': 'http://www.w3.org/2005/Atom'}
     root = ET.fromstring(data)
     papers = []

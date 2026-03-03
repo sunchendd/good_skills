@@ -40,8 +40,12 @@ def gh_get(path):
         f"https://api.github.com{path}",
         headers={"Authorization": f"token {GITHUB_TOKEN}", "User-Agent": "openclaw", "Accept": "application/vnd.github.v3+json"}
     )
-    with urllib.request.urlopen(req, timeout=10) as r:
-        return json.loads(r.read())
+    try:
+        with urllib.request.urlopen(req, timeout=10) as r:
+            return json.loads(r.read())
+    except Exception as e:
+        logger.warning(f"GitHub API 请求失败 {path}: {e}")
+        return None
 
 
 def fetch_tool_updates() -> list[dict]:

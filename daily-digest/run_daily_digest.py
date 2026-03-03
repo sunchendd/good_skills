@@ -27,8 +27,12 @@ def siyuan_post(path: str, data: dict) -> dict:
         "Authorization": f"Token {SIYUAN_TOKEN}",
         "Content-Type": "application/json",
     })
-    with urllib.request.urlopen(req, timeout=15) as r:
-        return json.loads(r.read())
+    try:
+        with urllib.request.urlopen(req, timeout=15) as r:
+            return json.loads(r.read())
+    except Exception as e:
+        logger.warning(f"思源 API 请求失败 {path}: {e}")
+        return {}
 
 
 def get_today_new_notes() -> list[dict]:
