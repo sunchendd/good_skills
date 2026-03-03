@@ -12,13 +12,15 @@ logger = logging.getLogger(__name__)
 
 KEYWORDS = ["AI工具", "人工智能", "大模型", "ChatGPT", "DeepSeek", "AI编程"]
 BILI_MAX_PER_KW = 8
+MAX_AGE_DAYS = 7  # 只保留最近 N 天内的内容
 OUTPUT_DIR = Path(__file__).parent / "newsletters"
+CUTOFF_DATE = (datetime.datetime.now() - datetime.timedelta(days=MAX_AGE_DAYS)).strftime('%Y-%m-%d')
 
 # ── B站搜索 ───────────────────────────────────────────────────────────────────
 def search_bili(keyword: str, page_size: int = 8) -> list[dict]:
     kw_enc = urllib.parse.quote(keyword)
     url = (f"https://api.bilibili.com/x/web-interface/search/all/v2"
-           f"?keyword={kw_enc}&page=1&pagesize={page_size}")
+           f"?keyword={kw_enc}&page=1&pagesize={page_size}&order=pubdate")
     req = urllib.request.Request(url, headers={
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
         "Referer": "https://www.bilibili.com",
@@ -59,8 +61,10 @@ def fetch_bili_videos() -> list[dict]:
                 seen_bvids.add(v['bvid'])
                 all_videos.append(v)
         time.sleep(0.3)
-    logger.info(f"✅ B站共抓取 {len(all_videos)} 个视频")
-    return all_videos
+    # 过滤掉超过 MAX_AGE_DAYS 天的旧内容
+    fresh_videos = [v for v in all_videos if v.get('pubdate', '') >= CUTOFF_DATE]
+    logger.info(f"✅ B站共抓取 {len(all_videos)} 个视频，过滤后保留 {len(fresh_videos)} 个（{MAX_AGE_DAYS}天内）")
+    return fresh_videos
 
 
 # ── 小红书搜索（Brave 搜索 + 微信/知乎 fallback）────────────────────────────
@@ -68,12 +72,14 @@ def fetch_xiaohongshu_videos() -> list[dict]:
     """小红书因登录墙无法直接抓取，改用Brave搜索引擎搜索小红书内容"""
     logger.info("📱 搜索小红书AI内容（via Brave搜索）...")
     results = []
-    keywords = ["小红书 AI工具推荐 2026", "小红书 大模型应用", "小红书 DeepSeek教程"]
+    this_month = datetime.datetime.now().strftime("%Y年%m月")
+    keywords = [f"小红书 AI工具 {this_month}", f"小红书 大模型应用 {this_month}", "小红书 DeepSeek教程 site:xiaohongshu.com"]
 
     for kw in keywords:
         try:
             kw_enc = urllib.parse.quote(kw)
-            url = f"https://www.google.com/search?q={kw_enc}&num=5"
+            # tbs=qdr:w 限制 Google 只返回过去一周内的结果
+            url = f"https://www.google.com/search?q={kw_enc}&num=5&tbs=qdr:w"
             req = urllib.request.Request(url, headers={
                 "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
             })

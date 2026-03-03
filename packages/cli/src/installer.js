@@ -44,7 +44,10 @@ function copyDirRecursive(src, dest) {
  */
 function createSymlink(src, dest) {
   mkdirp(path.dirname(dest));
-  if (fs.existsSync(dest) || fs.lstatSync(dest).isSymbolicLink().catch(() => false)) {
+  // Use lstatSync to check for symlink (sync, doesn't throw for symlinks)
+  let exists = false;
+  try { fs.lstatSync(dest); exists = true; } catch { /* not found */ }
+  if (exists) {
     fs.rmSync(dest, { recursive: true, force: true });
   }
   fs.symlinkSync(src, dest);
@@ -71,12 +74,97 @@ function parseThirdPartyRef(ref) {
 }
 
 /**
+ * Fetch text with exponential backoff retry
+ */
+async function fetchWithRetry(url, retries = 3, delayMs = 800) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fetchText(url);
+    } catch (e) {
+      if (i === retries - 1) throw e;
+      await new Promise((r) => setTimeout(r, delayMs * (i + 1)));
+    }
+  }
+}
+
+/**
+ * List skill files via GitHub Contents API (returns [{name, download_url, type, path}])
+ * Falls back to just SKILL.md if API fails.
+ */
+async function listSkillFilesRemote(owner, repo, skillName, branch = 'main') {
+  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${skillName}?ref=${branch}`;
+  try {
+    const data = await fetchWithRetry(apiUrl);
+    return JSON.parse(data);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Download all files in a skill directory from remote GitHub (recursive for subdirs)
+ * @param {string} rawBase - e.g. https://raw.githubusercontent.com/owner/repo/main
+ * @param {string} skillName
+ * @param {string} skillTargetPath - local dir to write to
+ * @param {string} [subPath=''] - relative subpath within skill dir (for recursion)
+ * @param {object} [ghInfo] - { owner, repo, branch } for Contents API listing
+ */
+async function downloadSkillDir(rawBase, skillName, skillTargetPath, subPath = '', ghInfo = null) {
+  const dirPath = subPath ? `${skillName}/${subPath}` : skillName;
+
+  let entries = null;
+  if (ghInfo) {
+    try {
+      const apiUrl = `https://api.github.com/repos/${ghInfo.owner}/${ghInfo.repo}/contents/${dirPath}?ref=${ghInfo.branch}`;
+      const data = await fetchWithRetry(apiUrl);
+      entries = JSON.parse(data);
+    } catch { /* fall through */ }
+  }
+
+  if (entries && Array.isArray(entries)) {
+    // Use Contents API listing: download each file
+    for (const entry of entries) {
+      if (entry.name.startsWith('.')) continue;
+      const localPath = subPath ? path.join(skillTargetPath, subPath, entry.name) : path.join(skillTargetPath, entry.name);
+      if (entry.type === 'dir') {
+        mkdirp(localPath);
+        const nextSub = subPath ? `${subPath}/${entry.name}` : entry.name;
+        await downloadSkillDir(rawBase, skillName, skillTargetPath, nextSub, ghInfo);
+      } else if (entry.type === 'file') {
+        const fileUrl = entry.download_url || `${rawBase}/${dirPath}/${entry.name}`;
+        const content = await fetchWithRetry(fileUrl);
+        mkdirp(path.dirname(localPath));
+        fs.writeFileSync(localPath, content, 'utf-8');
+      }
+    }
+  } else {
+    // Fallback: download known files — SKILL.md is required
+    const skillMdContent = await fetchWithRetry(`${rawBase}/${skillName}/SKILL.md`);
+    fs.writeFileSync(path.join(skillTargetPath, 'SKILL.md'), skillMdContent, 'utf-8');
+    // manifest.json is optional
+    try {
+      const manifestContent = await fetchWithRetry(`${rawBase}/${skillName}/manifest.json`);
+      fs.writeFileSync(path.join(skillTargetPath, 'manifest.json'), manifestContent, 'utf-8');
+    } catch { /* optional */ }
+  }
+}
+
+/**
+ * Extract GitHub owner/repo from a rawBase URL
+ */
+function parseRawBase(rawBase) {
+  const m = rawBase.match(/raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\/([^/]+)/);
+  if (!m) return null;
+  return { owner: m[1], repo: m[2], branch: m[3] };
+}
+
+/**
  * Get files to install for a skill from remote GitHub
  */
 async function getSkillFilesRemote(rawBase, skillName) {
-  // Try fetching SKILL.md first to confirm skill exists
+  // Legacy: just confirm SKILL.md exists and return content
   const skillMdUrl = `${rawBase}/${skillName}/SKILL.md`;
-  const content = await fetchText(skillMdUrl);
+  const content = await fetchWithRetry(skillMdUrl);
   return [{ url: skillMdUrl, name: 'SKILL.md', content }];
 }
 
@@ -92,40 +180,28 @@ function getLocalSkillDir(skillName) {
  * Install a skill to a target directory
  * @param {string} skillName
  * @param {string} targetDir - full path to install into
- * @param {Object} options - { useSymlink, thirdParty, rawBase }
+ * @param {Object} options - { useSymlink, thirdParty, rawBase, onProgress }
  */
 async function installSkill(skillName, targetDir, options = {}) {
   const skillTargetPath = path.join(targetDir, skillName);
-  const { useSymlink = false, thirdParty = false, rawBase = REPO_RAW_BASE } = options;
+  const { useSymlink = false, thirdParty = false, rawBase = REPO_RAW_BASE, onProgress } = options;
 
-  if (thirdParty) {
-    // Download SKILL.md from remote
-    const files = await getSkillFilesRemote(rawBase, skillName);
+  const ghInfo = parseRawBase(rawBase);
+
+  if (thirdParty || !fs.existsSync(getLocalSkillDir(skillName))) {
+    // Download from remote using GitHub Contents API
+    onProgress && onProgress('Downloading skill files...');
     mkdirp(skillTargetPath);
-    for (const file of files) {
-      fs.writeFileSync(path.join(skillTargetPath, file.name), file.content, 'utf-8');
-    }
-    // Try to download manifest.json too
-    try {
-      const manifestContent = await fetchText(`${rawBase}/${skillName}/manifest.json`);
-      fs.writeFileSync(path.join(skillTargetPath, 'manifest.json'), manifestContent, 'utf-8');
-    } catch {
-      // manifest.json optional for third-party skills
+    await downloadSkillDir(rawBase, skillName, skillTargetPath, '', ghInfo);
+    // Validate SKILL.md was successfully downloaded
+    if (!fs.existsSync(path.join(skillTargetPath, 'SKILL.md'))) {
+      fs.rmSync(skillTargetPath, { recursive: true, force: true });
+      throw new Error(`Skill "${skillName}" not found in registry. Run: npx good-skills list`);
     }
     return;
   }
 
   const localSkillDir = getLocalSkillDir(skillName);
-
-  if (!fs.existsSync(localSkillDir)) {
-    // Skill not local, download from remote
-    const files = await getSkillFilesRemote(rawBase, skillName);
-    mkdirp(skillTargetPath);
-    for (const file of files) {
-      fs.writeFileSync(path.join(skillTargetPath, file.name), file.content, 'utf-8');
-    }
-    return;
-  }
 
   if (useSymlink) {
     // Symlink for local dev — remove existing first
@@ -165,4 +241,5 @@ module.exports = {
   parseThirdPartyRef,
   mkdirp,
   copyDirRecursive,
+  fetchWithRetry,
 };

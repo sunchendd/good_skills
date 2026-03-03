@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 OUTPUT_DIR = Path(__file__).parent / "newsletters"
 TODAY = datetime.date.today().strftime("%Y-%m-%d")
 TODAY_ZH = datetime.datetime.now().strftime("%Y年%m月%d日")
+MAX_AGE_DAYS = 7
+CUTOFF_DATE = (datetime.datetime.now() - datetime.timedelta(days=MAX_AGE_DAYS)).strftime('%Y-%m-%d')
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
 
@@ -32,6 +34,16 @@ SEARCH_KEYWORDS = [
     "AI coding workflow 2026",
     "cursor IDE tutorial",
     "opencode AI editor",
+]
+
+# X/Twitter 创始人及官方账号（用于 Google/Brave 搜索）
+CREATOR_ACCOUNTS = [
+    {"handle": "AnthropicAI",  "label": "Anthropic 官方"},
+    {"handle": "dario_amodei", "label": "Dario Amodei"},
+    {"handle": "sama",         "label": "Sam Altman"},
+    {"handle": "opencode_ai",  "label": "OpenCode"},
+    {"handle": "cursor_ai",    "label": "Cursor"},
+    {"handle": "github",       "label": "GitHub Copilot"},
 ]
 
 
@@ -102,18 +114,21 @@ def search_vibe_content() -> list[dict]:
             logger.warning(f"HN 搜索失败 [{kw}]: {e}")
         time.sleep(0.2)
 
-    # B站搜索
+    # B站搜索（按最新发布排序 + 7天时间过滤）
     bili_keywords = ["vibe coding", "claude code教程", "AI编程助手"]
     for kw in bili_keywords:
         try:
             kw_enc = urllib.parse.quote(kw)
-            url = f"https://api.bilibili.com/x/web-interface/search/all/v2?keyword={kw_enc}&page=1&pagesize=5"
+            url = f"https://api.bilibili.com/x/web-interface/search/all/v2?keyword={kw_enc}&page=1&pagesize=8&order=pubdate"
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0", "Referer": "https://www.bilibili.com"})
             with urllib.request.urlopen(req, timeout=8) as r:
                 d = json.loads(r.read())
             for block in d.get('data', {}).get('result', []):
                 if block.get('result_type') == 'video':
                     for v in block.get('data', [])[:3]:
+                        pub = datetime.datetime.fromtimestamp(v.get('pubdate', 0)).strftime('%Y-%m-%d') if v.get('pubdate') else ''
+                        if pub < CUTOFF_DATE:
+                            continue  # 跳过 7 天前的旧视频
                         title = re.sub(r'<[^>]+>', '', v.get('title', ''))
                         results.append({
                             "source": "B站",
@@ -121,6 +136,7 @@ def search_vibe_content() -> list[dict]:
                             "url": f"https://www.bilibili.com/video/{v.get('bvid','')}",
                             "points": v.get("play", 0),
                             "keyword": kw,
+                            "pubdate": pub,
                         })
         except Exception as e:
             logger.warning(f"B站搜索失败 [{kw}]: {e}")
@@ -130,7 +146,83 @@ def search_vibe_content() -> list[dict]:
     return results
 
 
-def generate_summary(tool_updates, content_results) -> str:
+def fetch_creator_updates() -> list[dict]:
+    """通过 Google 搜索获取 X/Twitter 上 AI 工具创始人和官方账号的近期动态"""
+    logger.info("🐦 搜索 X/Twitter 创始人/官方账号近期动态...")
+    results = []
+    for acc in CREATOR_ACCOUNTS:
+        try:
+            # 用 Google 搜索 site:x.com 或 site:twitter.com，tbs=qdr:w 限制一周内
+            query = f'site:x.com/{acc["handle"]} OR site:twitter.com/{acc["handle"]} AI coding vibe'
+            kw_enc = urllib.parse.quote(query)
+            url = f"https://www.google.com/search?q={kw_enc}&num=3&tbs=qdr:w"
+            req = urllib.request.Request(url, headers={
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+            })
+            with urllib.request.urlopen(req, timeout=10) as r:
+                html = r.read().decode('utf-8', errors='ignore')
+            # 提取标题和链接
+            titles = re.findall(r'<h3[^>]*>([^<]+)</h3>', html)
+            links = re.findall(r'(https://(?:x\.com|twitter\.com)/\S+)', html)
+            for i, title in enumerate(titles[:2]):
+                clean_title = re.sub(r'<[^>]+>', '', title).strip()
+                if len(clean_title) < 5:
+                    continue
+                results.append({
+                    "source": f"X(@{acc['handle']})",
+                    "label": acc["label"],
+                    "title": clean_title[:120],
+                    "url": links[i] if i < len(links) else f"https://x.com/{acc['handle']}",
+                    "points": 0,
+                    "keyword": acc["handle"],
+                })
+            time.sleep(0.5)
+        except Exception as e:
+            logger.warning(f"X 搜索失败 [@{acc['handle']}]: {e}")
+    logger.info(f"✅ X/Twitter 共找到 {len(results)} 条动态")
+    return results
+
+
+def fetch_xiaohongshu_vibe() -> list[dict]:
+    """搜索小红书 Vibe Coding 相关内容（通过 Google site: 搜索 + 一周时间过滤）"""
+    logger.info("📱 搜索小红书 Vibe Coding 内容...")
+    results = []
+    this_month = datetime.datetime.now().strftime("%Y年%m月")
+    keywords = [
+        f"site:xiaohongshu.com vibe coding {this_month}",
+        f"site:xiaohongshu.com claude code {this_month}",
+        "小红书 AI编程 vibe coding 2026",
+    ]
+    for kw in keywords:
+        try:
+            kw_enc = urllib.parse.quote(kw)
+            url = f"https://www.google.com/search?q={kw_enc}&num=4&tbs=qdr:w"
+            req = urllib.request.Request(url, headers={
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+            })
+            with urllib.request.urlopen(req, timeout=10) as r:
+                html = r.read().decode('utf-8', errors='ignore')
+            titles = re.findall(r'<h3[^>]*>([^<]+)</h3>', html)
+            links = re.findall(r'(https://www\.xiaohongshu\.com/\S+)', html)
+            for i, link in enumerate(links[:3]):
+                clean_title = re.sub(r'<[^>]+>', '', titles[i]).strip() if i < len(titles) else kw
+                results.append({
+                    "source": "小红书",
+                    "title": clean_title[:100],
+                    "url": link,
+                    "points": 0,
+                    "keyword": kw,
+                })
+            time.sleep(0.8)
+        except Exception as e:
+            logger.warning(f"小红书搜索失败 [{kw[:30]}...]: {e}")
+    seen = set()
+    unique = [r for r in results if r['url'] not in seen and not seen.add(r['url'])]
+    logger.info(f"✅ 小红书共找到 {len(unique)} 条")
+    return unique
+
+
+def generate_summary(tool_updates, content_results, creator_results=None, xhs_results=None) -> str:
     client = OpenAI(api_key=os.environ["DEEPSEEK_API_KEY"], base_url="https://api.deepseek.com")
 
     updates_text = "\n".join([
@@ -143,6 +235,20 @@ def generate_summary(tool_updates, content_results) -> str:
         for c in content_results[:20]
     ])
 
+    creator_text = ""
+    if creator_results:
+        creator_text = "\n## 创始人/官方账号近期动态（X/Twitter）\n" + "\n".join([
+            f"[{c['label']}] {c['title']} | {c['url']}"
+            for c in creator_results[:10]
+        ])
+
+    xhs_text = ""
+    if xhs_results:
+        xhs_text = "\n## 小红书 Vibe Coding 内容\n" + "\n".join([
+            f"{x['title']} | {x['url']}"
+            for x in xhs_results[:5]
+        ])
+
     prompt = f"""你是 AI 编程工具领域的专家编辑。请为开发者生成今日 Vibe Coding & AI 工具动态简报。
 
 ## 工具版本更新
@@ -150,20 +256,25 @@ def generate_summary(tool_updates, content_results) -> str:
 
 ## 相关内容/教程
 {content_text}
+{creator_text}
+{xhs_text}
 
 请生成 Markdown 格式简报，包含：
 
 ### 🆕 本周工具更新（精选近7天有更新的）
 （每个工具：版本、关键更新点解读、对开发者的影响）
 
+### 🐦 创始人/官方动态
+（从 X/Twitter 动态中提炼最有价值的 2-3 条，加中文说明）
+
 ### 🎯 今日 Vibe Coding 精选
 （从内容列表中精选3-5条最有价值的教程/文章/视频，加中文摘要）
 
-### 💡 AI 编程技巧 Today
-（根据当前工具状态，给出1-2个实用 tip，比如 claude code 新用法/copilot 技巧）
+### 📱 小红书热门内容
+（小红书近期相关内容精选，有链接）
 
-### 📺 推荐视频
-（B站视频精选，有链接）
+### 💡 AI 编程技巧 Today
+（根据当前工具状态，给出1-2个实用 tip）
 
 语气要有干货感，面向有经验的开发者，50-100字/条摘要。"""
 
@@ -248,7 +359,9 @@ def main():
 
     tool_updates = fetch_tool_updates()
     content_results = search_vibe_content()
-    ai_summary = generate_summary(tool_updates, content_results)
+    creator_results = fetch_creator_updates()
+    xhs_results = fetch_xiaohongshu_vibe()
+    ai_summary = generate_summary(tool_updates, content_results, creator_results, xhs_results)
     newsletter = format_newsletter(tool_updates, ai_summary)
 
     OUTPUT_DIR.mkdir(exist_ok=True)

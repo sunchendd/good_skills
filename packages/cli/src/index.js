@@ -6,13 +6,14 @@ const { updateCommand } = require('./commands/update');
 const { statusCommand } = require('./commands/status');
 const { listCommand } = require('./commands/list');
 const { findCommand } = require('./commands/find');
+const pkg = require('../package.json');
 
 const program = new Command();
 
 program
   .name('good-skills')
   .description('CLI package manager for Good Skills - AI agent skills management')
-  .version('0.1.0');
+  .version(pkg.version);
 
 program
   .command('install [skill]')
