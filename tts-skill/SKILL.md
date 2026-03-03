@@ -1,6 +1,6 @@
 ---
 name: tts-skill
-description: 文字转语音。基于免费 edge-tts，支持 14 个中文音色（普通话/方言）、20+ 情感风格、语速调节，输出 MP3。
+description: 通用文字转语音工具（离线 edge-tts）。使用时机：当用户说"把这段文字转成语音"、"TTS 生成"、"朗读这段话"、"语音合成 MP3"。支持 14 个中文音色（普通话/方言）、20+ 情感风格、语速调节，输出 MP3。区别于 news-tts（news-tts 专用于新闻播报+Telegram 推送）。
 ---
 
 # 🎙️ TTS 文字转语音

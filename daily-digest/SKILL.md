@@ -1,6 +1,6 @@
 ---
 name: daily-digest
-description: 每日日志聚合器。汇总 GitHub 动态、思源新笔记、当日所有 skill 输出（arXiv/早报/健身/穿搭/视频），生成日志写入思源笔记。
+description: 每日日志聚合器。使用时机：当用户说"每日日志汇总"、"今日汇总"、"daily digest"、"汇总今天所有 skill 输出"。汇总 GitHub 动态、思源新笔记、当日所有 skill 输出（arXiv/早报/健身/穿搭/视频），生成日志写入思源笔记。
 ---
 
 # 📅 每日日志聚合

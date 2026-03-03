@@ -1,6 +1,6 @@
 ---
 name: vibe-daily
-description: 每日 AI 编程工具动态。搜索 B站/Reddit 最新 AI 编程工具评测、Cursor/Claude Code/Copilot 教程，DeepSeek 精选并推送。
+description: 每日 AI 编程工具动态推送。使用时机：当用户说"AI 编程工具动态"、"Claude Code 有什么更新"、"vibe coding 资讯"、"今日 vibe coding"。专注 Cursor/Claude Code/Copilot 更新和技巧，区别于 daily-newsletter（泛科技新闻）。
 ---
 
 # 🚀 Vibe Coding 每日精选

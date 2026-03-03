@@ -1,6 +1,6 @@
 ---
 name: super-fitness
-description: 三个月科学减脂计划。177cm/90kg→70kg，男性轻度脂肪肝。每日 AI 生成个性化运动+饮食方案，邮件+Bark 推送。
+description: 三个月科学减脂计划每日推送。使用时机：当用户说"今天健身"、"运动计划"、"减脂建议"、"每日健身打卡"、"fitness plan"。177cm/90kg→70kg，每日 AI 生成个性化运动+饮食方案，邮件+Bark 推送。
 ---
 
 # 💪 Super 健身
