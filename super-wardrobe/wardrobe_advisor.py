@@ -5,8 +5,10 @@ Super 衣橱 - 每日穿搭建议
 """
 
 import urllib.request
+import urllib.error
 import json
 import os
+import time
 import logging
 import datetime
 from openai import OpenAI
@@ -44,38 +46,48 @@ WEATHER_CODE_MAP = {
 }
 
 
-def fetch_weather() -> dict:
-    """获取杭州今日天气"""
+def fetch_weather(retries: int = 3) -> dict:
+    """获取杭州今日天气，失败自动重试"""
     url = f"https://wttr.in/{CITY_EN}?format=j1"
-    req = urllib.request.urlopen(url, timeout=15)
-    data = json.loads(req.read())
-    cur = data['current_condition'][0]
-    today = data['weather'][0]
-    tomorrow = data['weather'][1] if len(data['weather']) > 1 else today
+    last_error = None
+    for attempt in range(retries):
+        try:
+            req = urllib.request.urlopen(url, timeout=15)
+            data = json.loads(req.read())
+            cur = data['current_condition'][0]
+            today = data['weather'][0]
+            tomorrow = data['weather'][1] if len(data['weather']) > 1 else today
 
-    # 今日逐时分析
-    hourly = today.get('hourly', [])
-    max_rain_chance = max(int(h.get('chanceofrain', 0)) for h in hourly) if hourly else 0
-    max_snow_chance = max(int(h.get('chanceofsnow', 0)) for h in hourly) if hourly else 0
+            # 今日逐时分析
+            hourly = today.get('hourly', [])
+            max_rain_chance = max(int(h.get('chanceofrain', 0)) for h in hourly) if hourly else 0
+            max_snow_chance = max(int(h.get('chanceofsnow', 0)) for h in hourly) if hourly else 0
 
-    weather_code = cur.get('weatherCode', '116')
-    weather_desc = WEATHER_CODE_MAP.get(weather_code, cur['weatherDesc'][0]['value'])
+            weather_code = cur.get('weatherCode', '116')
+            weather_desc = WEATHER_CODE_MAP.get(weather_code, cur['weatherDesc'][0]['value'])
 
-    return {
-        'temp_now': int(cur['temp_C']),
-        'feels_like': int(cur['FeelsLikeC']),
-        'temp_max': int(today['maxtempC']),
-        'temp_min': int(today['mintempC']),
-        'humidity': int(cur['humidity']),
-        'wind_kmph': int(cur['windspeedKmph']),
-        'weather_desc': weather_desc,
-        'rain_chance': max_rain_chance,
-        'snow_chance': max_snow_chance,
-        'uv_index': int(cur.get('uvIndex', 0)),
-        'date': today['date'],
-        'sunrise': today['astronomy'][0]['sunrise'],
-        'sunset': today['astronomy'][0]['sunset'],
-    }
+            return {
+                'temp_now': int(cur['temp_C']),
+                'feels_like': int(cur['FeelsLikeC']),
+                'temp_max': int(today['maxtempC']),
+                'temp_min': int(today['mintempC']),
+                'humidity': int(cur['humidity']),
+                'wind_kmph': int(cur['windspeedKmph']),
+                'weather_desc': weather_desc,
+                'rain_chance': max_rain_chance,
+                'snow_chance': max_snow_chance,
+                'uv_index': int(cur.get('uvIndex', 0)),
+                'date': today['date'],
+                'sunrise': today['astronomy'][0]['sunrise'],
+                'sunset': today['astronomy'][0]['sunset'],
+            }
+        except (urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError) as e:
+            last_error = e
+            if attempt < retries - 1:
+                wait = 2 ** attempt
+                logger.warning(f"天气 API 第 {attempt + 1} 次失败，{wait}s 后重试: {e}")
+                time.sleep(wait)
+    raise RuntimeError(f"天气 API 连续 {retries} 次请求失败: {last_error}")
 
 
 def generate_outfit(weather: dict) -> str:
