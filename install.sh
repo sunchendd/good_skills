@@ -452,3 +452,18 @@ echo ""
 print_info "To update, run: ./update.sh"
 print_info "To uninstall, run: ./uninstall.sh"
 echo ""
+
+# Superpowers plugin prompt for Claude Code users
+if [ -d "$HOME/.claude" ] || [ -d "$HOME/Library/Application Support/Claude" ]; then
+    echo ""
+    echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${YELLOW}  💡 推荐：安装 Superpowers 工作流插件（Claude Code）${NC}"
+    echo -e "${YELLOW}  在 Claude Code 终端中依次运行以下两条命令：${NC}"
+    echo ""
+    echo -e "${BLUE}  /plugin marketplace add obra/superpowers-marketplace${NC}"
+    echo -e "${BLUE}  /plugin install superpowers@superpowers-marketplace${NC}"
+    echo ""
+    echo -e "${YELLOW}  安装后重启 Claude Code 即可获得完整工作流技能。${NC}"
+    echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+fi
