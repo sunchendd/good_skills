@@ -67,35 +67,51 @@ def fetch_bili_videos() -> list[dict]:
     return fresh_videos
 
 
-# ── 小红书搜索（Brave 搜索 + 微信/知乎 fallback）────────────────────────────
+# ── 小红书搜索（DuckDuckGo HTML 搜索）──────────────────────────────────────
+def _ddg_search(query: str, num: int = 5) -> list[dict]:
+    """用 DuckDuckGo HTML 接口搜索，返回去重后的结果列表"""
+    kw_enc = urllib.parse.quote(query)
+    url = f"https://html.duckduckgo.com/html/?q={kw_enc}"
+    req = urllib.request.Request(url, headers={
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+    })
+    with urllib.request.urlopen(req, timeout=10) as r:
+        html = r.read().decode('utf-8', errors='ignore')
+    # DDG 每个结果块中同一链接会出现 4 次，需去重保序
+    links_raw = re.findall(r'uddg=(https[^&"]+)', html)
+    seen = set(); links = []
+    for l in links_raw:
+        d = urllib.parse.unquote(l)
+        if d not in seen:
+            seen.add(d); links.append(d)
+    titles_raw = re.findall(r'class="result__a"[^>]*>(.*?)</a>', html, re.DOTALL)
+    titles = [re.sub(r'<[^>]+>', '', t).strip() for t in titles_raw]
+    results = []
+    for i in range(min(num, len(links))):
+        results.append({'title': titles[i] if i < len(titles) else query, 'url': links[i]})
+    return results
+
+
 def fetch_xiaohongshu_videos() -> list[dict]:
-    """小红书因登录墙无法直接抓取，改用Brave搜索引擎搜索小红书内容"""
-    logger.info("📱 搜索小红书AI内容（via Brave搜索）...")
+    """小红书因登录墙无法直接抓取，改用 DuckDuckGo 搜索相关内容"""
+    logger.info("📱 搜索小红书AI内容（via DuckDuckGo）...")
     results = []
     this_month = datetime.datetime.now().strftime("%Y年%m月")
-    keywords = [f"小红书 AI工具 {this_month}", f"小红书 大模型应用 {this_month}", "小红书 DeepSeek教程 site:xiaohongshu.com"]
-
+    keywords = [
+        f"小红书 AI工具推荐 {this_month}",
+        f"小红书 DeepSeek Claude {this_month}",
+        "小红书 AI编程 vibe coding 2026",
+    ]
     for kw in keywords:
         try:
-            kw_enc = urllib.parse.quote(kw)
-            # tbs=qdr:w 限制 Google 只返回过去一周内的结果
-            url = f"https://www.google.com/search?q={kw_enc}&num=5&tbs=qdr:w"
-            req = urllib.request.Request(url, headers={
-                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-            })
-            with urllib.request.urlopen(req, timeout=10) as r:
-                html = r.read().decode('utf-8', errors='ignore')
-            # 提取小红书链接
-            links = re.findall(r'(https://www\.xiaohongshu\.com/explore/[a-f0-9]+)', html)
-            titles = re.findall(r'<h3[^>]*>([^<]+)</h3>', html)
-            for i, link in enumerate(links[:3]):
+            for item in _ddg_search(kw, num=3):
                 results.append({
                     'platform': 'xiaohongshu',
-                    'title': titles[i].strip()[:80] if i < len(titles) else kw,
-                    'link': link,
+                    'title': item['title'][:80],
+                    'link': item['url'],
                     'author': '', 'desc': '', 'keyword': kw,
                 })
-            time.sleep(1)
+            time.sleep(0.8)
         except Exception as e:
             logger.warning(f"小红书搜索失败 [{kw}]: {e}")
 
@@ -118,13 +134,14 @@ def select_with_deepseek(bili_videos: list, xhs_videos: list) -> dict:
         for i, v in enumerate(xhs_videos[:20])
     ])
 
-    prompt = f"""你是 AI/科技内容筛选专家。从以下 B站视频和小红书内容中，分别精选最有价值的 AI工具/科技内容。
+    prompt = f"""你是 AI/科技内容筛选专家。从以下 B站视频和"AI社交内容"（来自搜索到的中文博客/知乎/微信等关于小红书AI趋势的文章）中，分别精选最有价值的内容。
 
 筛选标准：
 1. 内容具体，有实际工具推荐或技术干货
 2. 不是营销广告或标题党
 3. B站优先选播放量高的
 4. 覆盖不同类型（工具使用/技术解析/行业动态）
+5. AI社交内容：接受任何提到小红书AI趋势或AI工具的中文文章/帖子，无需必须是xiaohongshu.com域名
 
 输出 JSON：
 {{
@@ -155,8 +172,8 @@ def select_with_deepseek(bili_videos: list, xhs_videos: list) -> dict:
 B站视频列表：
 {bili_text}
 
-小红书内容列表（如为空则输出空数组）：
-{xhs_text if xhs_text.strip() else "（暂无小红书数据）"}"""
+AI社交/小红书相关内容列表（包含中文博客/知乎/微信等讨论小红书AI趋势的文章，如为空则输出空数组）：
+{xhs_text if xhs_text.strip() else "（暂无数据）"}"""
 
     resp = client.chat.completions.create(
         model="deepseek-chat",
@@ -196,7 +213,7 @@ def format_newsletter(selected: dict) -> str:
         ]
 
     if xhs_list:
-        lines += [f"## 📕 小红书精选（{len(xhs_list)} 条）", ""]
+        lines += [f"## 📱 AI社交精选（{len(xhs_list)} 条）", ""]
         for v in xhs_list:
             icon = cat_icons.get(v.get('category', ''), '📌')
             lines += [
@@ -209,7 +226,7 @@ def format_newsletter(selected: dict) -> str:
                 "", "---", "",
             ]
     else:
-        lines += ["## 📕 小红书", "", "（今日小红书数据暂不可用，明日继续尝试）", "", "---", ""]
+        lines += ["## 📱 AI社交", "", "（今日暂无相关内容）", "", "---", ""]
 
     lines.append(f"*每日 AI 视频精选 · {today} {now}*")
     return "\n".join(lines)

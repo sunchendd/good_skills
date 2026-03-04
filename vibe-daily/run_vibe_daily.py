@@ -65,25 +65,27 @@ def fetch_tool_updates() -> list[dict]:
     for w in WATCH_REPOS:
         try:
             releases = gh_get(f"/repos/{w['repo']}/releases?per_page=3")
-            if releases:
-                latest = releases[0]
-                tag = latest.get("tag_name", "")
-                published = latest.get("published_at", "")[:10]
-                body = latest.get("body", "")[:500]
-                # 检查是否是近7天内发布的
-                from datetime import timedelta
-                pub_date = datetime.date.fromisoformat(published) if published else None
-                is_recent = pub_date and (datetime.date.today() - pub_date).days <= 7
-                updates.append({
-                    "tool": w["label"],
-                    "repo": w["repo"],
-                    "version": tag,
-                    "published": published,
-                    "changelog": body,
-                    "url": latest.get("html_url", ""),
-                    "is_recent": is_recent,
-                })
-                logger.info(f"✅ {w['label']}: {tag} ({published}) {'🆕' if is_recent else ''}")
+            if not releases or not isinstance(releases, list) or len(releases) == 0:
+                logger.info(f"  {w['label']}: 无公开 releases")
+                continue
+            latest = releases[0]
+            tag = latest.get("tag_name", "")
+            published = latest.get("published_at", "")[:10]
+            body = latest.get("body", "")[:500]
+            # 检查是否是近7天内发布的
+            from datetime import timedelta
+            pub_date = datetime.date.fromisoformat(published) if published else None
+            is_recent = pub_date and (datetime.date.today() - pub_date).days <= 7
+            updates.append({
+                "tool": w["label"],
+                "repo": w["repo"],
+                "version": tag,
+                "published": published,
+                "changelog": body,
+                "url": latest.get("html_url", ""),
+                "is_recent": is_recent,
+            })
+            logger.info(f"✅ {w['label']}: {tag} ({published}) {'🆕' if is_recent else ''}")
         except Exception as e:
             logger.warning(f"  {w['label']} 获取失败: {e}")
     return updates
@@ -147,35 +149,40 @@ def search_vibe_content() -> list[dict]:
 
 
 def fetch_creator_updates() -> list[dict]:
-    """通过 Google 搜索获取 X/Twitter 上 AI 工具创始人和官方账号的近期动态"""
+    """通过 DuckDuckGo 搜索 X/Twitter 上 AI 工具创始人和官方账号的近期动态"""
     logger.info("🐦 搜索 X/Twitter 创始人/官方账号近期动态...")
+
+    def _ddg_search(query: str, num: int = 3) -> list[dict]:
+        kw_enc = urllib.parse.quote(query)
+        url = f"https://html.duckduckgo.com/html/?q={kw_enc}"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"})
+        with urllib.request.urlopen(req, timeout=10) as r:
+            html = r.read().decode('utf-8', errors='ignore')
+        links_raw = re.findall(r'uddg=(https[^&"]+)', html)
+        seen_u = set(); links = []
+        for l in links_raw:
+            d = urllib.parse.unquote(l)
+            if d not in seen_u: seen_u.add(d); links.append(d)
+        titles_raw = re.findall(r'class="result__a"[^>]*>(.*?)</a>', html, re.DOTALL)
+        titles = [re.sub(r'<[^>]+>', '', t).strip() for t in titles_raw]
+        return [{'title': titles[i] if i < len(titles) else '', 'url': links[i]} for i in range(min(num, len(links)))]
+
     results = []
     for acc in CREATOR_ACCOUNTS:
         try:
-            # 用 Google 搜索 site:x.com 或 site:twitter.com，tbs=qdr:w 限制一周内
-            query = f'site:x.com/{acc["handle"]} OR site:twitter.com/{acc["handle"]} AI coding vibe'
-            kw_enc = urllib.parse.quote(query)
-            url = f"https://www.google.com/search?q={kw_enc}&num=3&tbs=qdr:w"
-            req = urllib.request.Request(url, headers={
-                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-            })
-            with urllib.request.urlopen(req, timeout=10) as r:
-                html = r.read().decode('utf-8', errors='ignore')
-            # 提取标题和链接
-            titles = re.findall(r'<h3[^>]*>([^<]+)</h3>', html)
-            links = re.findall(r'(https://(?:x\.com|twitter\.com)/\S+)', html)
-            for i, title in enumerate(titles[:2]):
-                clean_title = re.sub(r'<[^>]+>', '', title).strip()
-                if len(clean_title) < 5:
-                    continue
-                results.append({
-                    "source": f"X(@{acc['handle']})",
-                    "label": acc["label"],
-                    "title": clean_title[:120],
-                    "url": links[i] if i < len(links) else f"https://x.com/{acc['handle']}",
-                    "points": 0,
-                    "keyword": acc["handle"],
-                })
+            # 搜索 x.com 账号的近期内容（不用 site: 因为 x.com 登录墙）
+            query = f'{acc["handle"]} twitter AI coding vibe 2026'
+            items = _ddg_search(query, num=2)
+            for item in items:
+                if item['title']:
+                    results.append({
+                        "source": f"X(@{acc['handle']})",
+                        "label": acc["label"],
+                        "title": item['title'][:120],
+                        "url": item['url'],
+                        "points": 0,
+                        "keyword": acc["handle"],
+                    })
             time.sleep(0.5)
         except Exception as e:
             logger.warning(f"X 搜索失败 [@{acc['handle']}]: {e}")
@@ -184,41 +191,47 @@ def fetch_creator_updates() -> list[dict]:
 
 
 def fetch_xiaohongshu_vibe() -> list[dict]:
-    """搜索小红书 Vibe Coding 相关内容（通过 Google site: 搜索 + 一周时间过滤）"""
+    """搜索小红书 Vibe Coding 相关内容（通过 DuckDuckGo 搜索）"""
     logger.info("📱 搜索小红书 Vibe Coding 内容...")
+
+    def _ddg_search(query: str, num: int = 4) -> list[dict]:
+        kw_enc = urllib.parse.quote(query)
+        url = f"https://html.duckduckgo.com/html/?q={kw_enc}"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"})
+        with urllib.request.urlopen(req, timeout=10) as r:
+            html = r.read().decode('utf-8', errors='ignore')
+        links_raw = re.findall(r'uddg=(https[^&"]+)', html)
+        seen_u = set(); links = []
+        for l in links_raw:
+            d = urllib.parse.unquote(l)
+            if d not in seen_u: seen_u.add(d); links.append(d)
+        titles_raw = re.findall(r'class="result__a"[^>]*>(.*?)</a>', html, re.DOTALL)
+        titles = [re.sub(r'<[^>]+>', '', t).strip() for t in titles_raw]
+        return [{'title': titles[i] if i < len(titles) else '', 'url': links[i]} for i in range(min(num, len(links)))]
+
     results = []
     this_month = datetime.datetime.now().strftime("%Y年%m月")
     keywords = [
-        f"site:xiaohongshu.com vibe coding {this_month}",
-        f"site:xiaohongshu.com claude code {this_month}",
-        "小红书 AI编程 vibe coding 2026",
+        f"小红书 vibe coding claude code {this_month}",
+        f"小红书 AI编程工具推荐 2026",
     ]
     for kw in keywords:
         try:
-            kw_enc = urllib.parse.quote(kw)
-            url = f"https://www.google.com/search?q={kw_enc}&num=4&tbs=qdr:w"
-            req = urllib.request.Request(url, headers={
-                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-            })
-            with urllib.request.urlopen(req, timeout=10) as r:
-                html = r.read().decode('utf-8', errors='ignore')
-            titles = re.findall(r'<h3[^>]*>([^<]+)</h3>', html)
-            links = re.findall(r'(https://www\.xiaohongshu\.com/\S+)', html)
-            for i, link in enumerate(links[:3]):
-                clean_title = re.sub(r'<[^>]+>', '', titles[i]).strip() if i < len(titles) else kw
-                results.append({
-                    "source": "小红书",
-                    "title": clean_title[:100],
-                    "url": link,
-                    "points": 0,
-                    "keyword": kw,
-                })
+            for item in _ddg_search(kw, num=3):
+                if item['title']:
+                    results.append({
+                        "source": "小红书相关",
+                        "title": item['title'][:100],
+                        "url": item['url'],
+                        "points": 0,
+                        "keyword": kw,
+                    })
             time.sleep(0.8)
         except Exception as e:
             logger.warning(f"小红书搜索失败 [{kw[:30]}...]: {e}")
     seen = set()
     unique = [r for r in results if r['url'] not in seen and not seen.add(r['url'])]
-    logger.info(f"✅ 小红书共找到 {len(unique)} 条")
+    logger.info(f"✅ 小红书相关内容共找到 {len(unique)} 条")
     return unique
 
 
