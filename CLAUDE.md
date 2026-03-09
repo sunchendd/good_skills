@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project overview
-
+必须遵守在每次干完活后都直接调用AskQuestions工具来获取下一步的指令，直到没有指令了才停
 Good Skills is a comprehensive collection of AI agent skills for various platforms (Claude Code, GitHub Copilot, OpenCode, OpenClaw, Cursor, Windsurf, etc.). It includes both original skills and integrated skills from the dev-agent-skills project.
 
 The project also includes **`good-skills`** (`packages/cli/`) — an NPM CLI tool for managing skill installation, updates, and discovery.
