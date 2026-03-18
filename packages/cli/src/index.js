@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const { Command } = require('commander');
+const { addCommand } = require('./commands/add');
 const { installCommand } = require('./commands/install');
 const { updateCommand } = require('./commands/update');
 const { statusCommand } = require('./commands/status');
@@ -17,11 +18,22 @@ program
 
 program
   .command('install [skill]')
-  .description('Install a skill (e.g. git-commit, owner/repo@skill-name)')
+  .description('Install a skill (e.g. git-commit, owner/repo@skill-name, or GitHub URL + --skill)')
   .option('--all', 'Install all skills from registry')
-  .option('--platform <platform>', 'Target platform (claude/github-copilot/opencode/openclaw/cursor/windsurf/all)', 'all')
+  .option('--skill <name>', 'Skill directory name when installing from a GitHub repo or URL')
+  .option('--ref <branch>', 'Git branch to fetch from when installing from a GitHub repo')
+  .option('--platform <platform>', 'Target platform (claude/github-copilot/opencode/openclaw/cursor/windsurf/antigravity/codex/all)', 'all')
   .option('--project', 'Install to project directory instead of global')
   .action(installCommand);
+
+program
+  .command('add <repo>')
+  .description('Install a specific skill from a GitHub repo or URL')
+  .requiredOption('--skill <name>', 'Skill directory name inside the GitHub repository')
+  .option('--ref <branch>', 'Git branch to fetch from when installing from a GitHub repo')
+  .option('--platform <platform>', 'Target platform (claude/github-copilot/opencode/openclaw/cursor/windsurf/antigravity/codex/all)', 'all')
+  .option('--project', 'Install to project directory instead of global')
+  .action(addCommand);
 
 program
   .command('update [skill]')

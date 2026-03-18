@@ -38,7 +38,7 @@ BRANCH="main"
 # Parse arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --github-copilot|--claude|--opencode|--openclaw|--antigravity|--cursor|--windsurf)
+        --github-copilot|--claude|--opencode|--openclaw|--antigravity|--codex|--cursor|--windsurf)
             INSTALL_ARGS="$1"
             shift
             ;;
@@ -77,6 +77,7 @@ Options:
     --opencode          Install to OpenCode only
     --openclaw          Install to OpenClaw only
     --antigravity       Install to Antigravity only
+    --codex             Install to Codex only
     --cursor            Install to Cursor only
     --windsurf          Install to Windsurf only
     --global            Install globally (default)
@@ -90,7 +91,7 @@ Examples:
     curl -fsSL https://raw.githubusercontent.com/sunchendd/good_skills/main/remote-install.sh | bash
 
     # Install to specific platforms
-    curl -fsSL https://raw.githubusercontent.com/sunchendd/good_skills/main/remote-install.sh | bash -s -- --github-copilot --claude
+    curl -fsSL https://raw.githubusercontent.com/sunchendd/good_skills/main/remote-install.sh | bash -s -- --github-copilot --claude --codex
 
     # Install to current project
     curl -fsSL https://raw.githubusercontent.com/sunchendd/good_skills/main/remote-install.sh | bash -s -- --all --project

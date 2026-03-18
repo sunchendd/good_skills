@@ -33,6 +33,10 @@ const PLATFORMS = {
     global: path.join(HOME, '.agent', 'skills'),
     project: path.join('.agent', 'skills'),
   },
+  codex: {
+    global: path.join(HOME, '.codex', 'skills'),
+    project: path.join('.codex', 'skills'),
+  },
 };
 
 /**

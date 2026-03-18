@@ -5,8 +5,13 @@ import unittest
 from datetime import date
 from unittest.mock import patch
 
+from shared.automation_routes import get_automation_route
 from shared.config import Config
-from shared.siyuan import SiyuanClient, build_automation_path
+from shared.siyuan import (
+    SiyuanClient,
+    build_automation_path,
+    save_named_automation_report,
+)
 
 
 class ConfigTests(unittest.TestCase):
@@ -39,6 +44,12 @@ class ConfigTests(unittest.TestCase):
 
 
 class SiyuanPathTests(unittest.TestCase):
+    def test_get_automation_route_returns_expected_chinese_structure(self) -> None:
+        route = get_automation_route("wuyu_daily")
+
+        self.assertEqual(route.feature_name, "内容创作")
+        self.assertEqual(route.report_name, "无语哥日报")
+
     def test_build_automation_path_uses_chinese_structure(self) -> None:
         path = build_automation_path(
             "效率复盘",
@@ -66,6 +77,33 @@ class SiyuanPathTests(unittest.TestCase):
         )
         self.assertTrue(result["ok"])
         self.assertEqual(result["doc_id"], "doc-1")
+
+    def test_save_named_automation_report_uses_route_mapping(self) -> None:
+        with patch("shared.siyuan.SiyuanClient") as client_cls:
+            client = client_cls.return_value
+            client.create_automation_doc.return_value = {
+                "ok": True,
+                "path": "/内容创作/无语哥日报/2026-03-18",
+                "doc_id": "doc-2",
+            }
+
+            result = save_named_automation_report(
+                route_key="wuyu_daily",
+                markdown="# 内容",
+                day=date(2026, 3, 18),
+                title="无语哥日报 2026-03-18",
+            )
+
+        client.create_automation_doc.assert_called_once_with(
+            feature_name="内容创作",
+            report_name="无语哥日报",
+            markdown="# 内容",
+            doc_name=None,
+            day=date(2026, 3, 18),
+            title="无语哥日报 2026-03-18",
+        )
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["doc_id"], "doc-2")
 
 
 if __name__ == "__main__":

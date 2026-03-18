@@ -52,6 +52,9 @@ get_global_path() {
         antigravity)
             echo "$HOME/.gemini/antigravity/skills"
             ;;
+        codex)
+            echo "$HOME/.codex/skills"
+            ;;
         cursor)
             echo "$HOME/.cursor/skills"
             ;;
@@ -82,6 +85,9 @@ get_project_path() {
         antigravity)
             echo ".agent/skills"
             ;;
+        codex)
+            echo ".codex/skills"
+            ;;
         cursor)
             echo ".cursor/skills"
             ;;
@@ -108,6 +114,7 @@ Options:
     --opencode          Update OpenCode
     --openclaw          Update OpenClaw (both ~/.openclaw/skills and ~/clawd/skills)
     --antigravity       Update Antigravity
+    --codex             Update Codex
     --cursor            Update Cursor
     --windsurf          Update Windsurf
     --global            Update in global locations (default)
@@ -164,6 +171,10 @@ while [[ $# -gt 0 ]]; do
             PLATFORMS="$PLATFORMS antigravity"
             shift
             ;;
+        --codex)
+            PLATFORMS="$PLATFORMS codex"
+            shift
+            ;;
         --cursor)
             PLATFORMS="$PLATFORMS cursor"
             shift
@@ -206,7 +217,7 @@ done
 
 # If --all is specified, add all platforms
 if [ "$UPDATE_ALL" = true ]; then
-    PLATFORMS="github-copilot claude opencode openclaw antigravity cursor windsurf"
+    PLATFORMS="github-copilot claude opencode openclaw antigravity codex cursor windsurf"
 fi
 
 # Check if any platforms are selected

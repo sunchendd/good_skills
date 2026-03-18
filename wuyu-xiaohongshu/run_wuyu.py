@@ -13,9 +13,9 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 try:
-    from shared.siyuan import save_automation_report
+    from shared.siyuan import save_named_automation_report
 except Exception:
-    save_automation_report = None
+    save_named_automation_report = None
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -307,14 +307,13 @@ def send_bark(title, body):
 
 
 def save_to_siyuan(content: str):
-    if not save_automation_report:
+    if not save_named_automation_report:
         logger.warning("共享思源模块不可用，跳过思源写入")
         return ""
     try:
-        result = save_automation_report(
+        result = save_named_automation_report(
+            route_key="wuyu_daily",
             markdown=content,
-            feature_name="内容创作",
-            report_name="无语哥日报",
             day=TODAY,
             title=f"无语哥日报 {TODAY}",
         )

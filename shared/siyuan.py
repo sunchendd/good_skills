@@ -8,6 +8,7 @@ import urllib.error
 import urllib.request
 
 from .config import cfg
+from .automation_routes import get_automation_route
 
 logger = logging.getLogger(__name__)
 
@@ -212,6 +213,25 @@ def save_automation_report(
         feature_name=feature_name,
         report_name=report_name,
         markdown=markdown,
+        doc_name=doc_name,
+        day=day,
+        title=title,
+    )
+
+
+def save_named_automation_report(
+    *,
+    route_key: str,
+    markdown: str,
+    doc_name: str | None = None,
+    day: date | str | None = None,
+    title: str | None = None,
+) -> dict:
+    route = get_automation_route(route_key)
+    return save_automation_report(
+        markdown=markdown,
+        feature_name=route.feature_name,
+        report_name=route.report_name,
         doc_name=doc_name,
         day=day,
         title=title,

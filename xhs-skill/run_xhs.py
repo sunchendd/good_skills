@@ -27,11 +27,12 @@ from typing import List, Optional
 try:
     from shared.config import cfg
     from shared.bark import bark_notify
-    from shared.siyuan import SiyuanClient
+    from shared.siyuan import SiyuanClient, save_named_automation_report
 except Exception:
     cfg = None
     bark_notify = None
     SiyuanClient = None
+    save_named_automation_report = None
 
 XHS_CLI = shutil.which('xhs-mcp') or shutil.which('xhs-mcp-cli') or shutil.which('xhs')
 MCP_CLI = shutil.which('mcporter')
@@ -134,14 +135,12 @@ def publish_note(title: str, content: str, images: List[str], tags: List[str], d
 
 
 def save_to_siyuan(title: str, content: str, path: Optional[str] = None):
-    if not SiyuanClient:
+    if not SiyuanClient or not save_named_automation_report:
         print('思源未配置，跳过保存')
         return None
-    client = SiyuanClient(host=cfg.siyuan_host, token=cfg.siyuan_token)
     doc_name = (path or title[:10]).strip("/").split("/")[-1]
-    res = client.create_automation_doc(
-        feature_name="内容创作",
-        report_name="无语哥日报",
+    res = save_named_automation_report(
+        route_key="wuyu_daily",
         doc_name=doc_name,
         markdown=content,
         title=title,

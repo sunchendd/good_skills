@@ -13,9 +13,9 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 try:
-    from shared.siyuan import save_automation_report
+    from shared.siyuan import save_named_automation_report
 except Exception:
-    save_automation_report = None
+    save_named_automation_report = None
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -261,15 +261,14 @@ def format_full_report(ai_content: str, data: dict) -> str:
 
 
 def save_to_siyuan(content: str):
-    if not save_automation_report:
+    if not save_named_automation_report:
         logger.warning("共享思源模块不可用，跳过思源写入")
         return
     try:
         doc_name = f"{week_start.strftime('%Y-%m-%d')}_第{WEEK_NUM}周"
-        result = save_automation_report(
+        result = save_named_automation_report(
+            route_key="weekly_report",
             markdown=content,
-            feature_name="效率复盘",
-            report_name="周报",
             doc_name=doc_name,
             title=f"第{WEEK_NUM}周周报",
         )

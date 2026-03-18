@@ -212,6 +212,9 @@ npx good-skills install git-commit
 # Install to specific platform
 npx good-skills install git-commit --platform claude
 
+# Install to Codex
+npx good-skills install git-commit --platform codex
+
 # Install all skills
 npx good-skills install --all
 

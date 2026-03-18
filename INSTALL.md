@@ -62,8 +62,11 @@ This will install all skills to all supported platforms using symbolic links.
 # Claude Code only
 ./install.sh --claude
 
+# Codex only
+./install.sh --codex
+
 # Multiple specific platforms
-./install.sh --github-copilot --claude --opencode
+./install.sh --github-copilot --claude --codex --opencode
 ```
 
 #### Project vs Global Installation
@@ -87,6 +90,7 @@ cd /path/to/your/project
 | **Claude Code** | `~/.claude/skills/` | `.claude/skills/` |
 | **OpenCode** | `~/.config/opencode/skill/` | `.opencode/skill/` |
 | **Antigravity** | `~/.gemini/antigravity/skills/` | `.agent/skills/` |
+| **Codex** | `~/.codex/skills/` | `.codex/skills/` |
 | **Cursor** | `~/.cursor/skills/` | `.cursor/skills/` |
 | **Windsurf** | `~/.codeium/windsurf/skills/` | `.windsurf/skills/` |
 | **Trae** | Manual configuration required | `.trae/skills/` |
@@ -100,7 +104,7 @@ To remove installed skills:
 ./uninstall.sh --all
 
 # Uninstall from specific platforms
-./uninstall.sh --github-copilot --claude
+./uninstall.sh --github-copilot --claude --codex
 ```
 
 ### Update

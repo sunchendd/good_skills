@@ -1,6 +1,6 @@
 {
   "name": "good-skills",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "CLI package manager for Good Skills - install, update, and manage AI agent skills",
   "main": "src/index.js",
   "bin": {
@@ -11,7 +11,7 @@
     "src"
   ],
   "scripts": {
-    "test": "node --test src/**/*.test.js"
+    "test": "node --test src/*.test.js src/**/*.test.js"
   },
   "keywords": [
     "ai",

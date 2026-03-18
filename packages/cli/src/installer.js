@@ -4,6 +4,19 @@ const https = require('https');
 const { fetchText } = require('./registry');
 
 const REPO_RAW_BASE = 'https://raw.githubusercontent.com/sunchendd/good_skills/main';
+const REMOTE_SKILL_DISCOVERY_PREFIXES = [
+  '',
+  'skills',
+  '.skills',
+  '.skills/registry',
+  '.agent/skills',
+  '.agents/skills',
+  '.claude/skills',
+  '.codex/skills',
+  '.cursor/skills',
+  '.github/skills',
+  '.windsurf/skills',
+];
 
 /**
  * Recursively create directories
@@ -74,6 +87,81 @@ function parseThirdPartyRef(ref) {
 }
 
 /**
+ * Parse a GitHub repository input.
+ * Supports:
+ * - https://github.com/owner/repo
+ * - https://github.com/owner/repo.git
+ * - https://github.com/owner/repo/tree/branch
+ * - owner/repo
+ */
+function parseGitHubRepoInput(input, branchOverride = null) {
+  const value = String(input || '').trim();
+  if (!value) {
+    throw new Error('Specify a GitHub repository URL or owner/repo.');
+  }
+
+  let owner;
+  let repo;
+  let branchFromUrl = null;
+
+  if (/^https?:\/\//i.test(value)) {
+    let url;
+    try {
+      url = new URL(value);
+    } catch {
+      throw new Error(`Invalid GitHub repository URL: "${input}"`);
+    }
+
+    if (!['github.com', 'www.github.com'].includes(url.hostname)) {
+      throw new Error('GitHub repository URL must use github.com.');
+    }
+
+    const parts = url.pathname.replace(/^\/+|\/+$/g, '').split('/').filter(Boolean);
+    if (parts.length < 2) {
+      throw new Error(`Invalid GitHub repository URL: "${input}"`);
+    }
+
+    [owner, repo] = parts;
+    repo = repo.replace(/\.git$/i, '');
+
+    if (parts[2] === 'tree' && parts[3]) {
+      branchFromUrl = decodeURIComponent(parts.slice(3).join('/'));
+    }
+  } else {
+    const parts = value.replace(/^\/+|\/+$/g, '').replace(/\.git$/i, '').split('/');
+    if (parts.length !== 2 || !parts[0] || !parts[1]) {
+      throw new Error('GitHub repository must use https://github.com/owner/repo or owner/repo.');
+    }
+    [owner, repo] = parts;
+  }
+
+  const branch = branchOverride || branchFromUrl || 'main';
+  return {
+    owner,
+    repo,
+    branch,
+    rawBase: `https://raw.githubusercontent.com/${owner}/${repo}/${branch}`,
+  };
+}
+
+function buildThirdPartyInstallTarget(repoInput, skillName, branchOverride = null) {
+  if (!skillName) {
+    throw new Error('Specify --skill <name> for the third-party skill directory.');
+  }
+
+  const parsed = parseGitHubRepoInput(repoInput, branchOverride);
+  return {
+    name: skillName,
+    thirdParty: true,
+    rawBase: parsed.rawBase,
+  };
+}
+
+function getCandidateRemoteSkillPaths(skillName) {
+  return REMOTE_SKILL_DISCOVERY_PREFIXES.map((prefix) => (prefix ? `${prefix}/${skillName}` : skillName));
+}
+
+/**
  * Fetch text with exponential backoff retry
  */
 async function fetchWithRetry(url, retries = 3, delayMs = 800) {
@@ -109,8 +197,8 @@ async function listSkillFilesRemote(owner, repo, skillName, branch = 'main') {
  * @param {string} [subPath=''] - relative subpath within skill dir (for recursion)
  * @param {object} [ghInfo] - { owner, repo, branch } for Contents API listing
  */
-async function downloadSkillDir(rawBase, skillName, skillTargetPath, subPath = '', ghInfo = null) {
-  const dirPath = subPath ? `${skillName}/${subPath}` : skillName;
+async function downloadSkillDir(rawBase, skillName, skillTargetPath, subPath = '', ghInfo = null, remoteSkillPath = skillName) {
+  const dirPath = subPath ? `${remoteSkillPath}/${subPath}` : remoteSkillPath;
 
   let entries = null;
   if (ghInfo) {
@@ -129,7 +217,7 @@ async function downloadSkillDir(rawBase, skillName, skillTargetPath, subPath = '
       if (entry.type === 'dir') {
         mkdirp(localPath);
         const nextSub = subPath ? `${subPath}/${entry.name}` : entry.name;
-        await downloadSkillDir(rawBase, skillName, skillTargetPath, nextSub, ghInfo);
+        await downloadSkillDir(rawBase, skillName, skillTargetPath, nextSub, ghInfo, remoteSkillPath);
       } else if (entry.type === 'file') {
         const fileUrl = entry.download_url || `${rawBase}/${dirPath}/${entry.name}`;
         const content = await fetchWithRetry(fileUrl);
@@ -139,14 +227,36 @@ async function downloadSkillDir(rawBase, skillName, skillTargetPath, subPath = '
     }
   } else {
     // Fallback: download known files — SKILL.md is required
-    const skillMdContent = await fetchWithRetry(`${rawBase}/${skillName}/SKILL.md`);
+    const skillMdContent = await fetchWithRetry(`${rawBase}/${remoteSkillPath}/SKILL.md`);
     fs.writeFileSync(path.join(skillTargetPath, 'SKILL.md'), skillMdContent, 'utf-8');
     // manifest.json is optional
     try {
-      const manifestContent = await fetchWithRetry(`${rawBase}/${skillName}/manifest.json`);
+      const manifestContent = await fetchWithRetry(`${rawBase}/${remoteSkillPath}/manifest.json`);
       fs.writeFileSync(path.join(skillTargetPath, 'manifest.json'), manifestContent, 'utf-8');
     } catch { /* optional */ }
   }
+}
+
+async function resolveRemoteSkillPath(rawBase, skillName, ghInfo = null) {
+  for (const candidatePath of getCandidateRemoteSkillPaths(skillName)) {
+    const skillMdUrl = `${rawBase}/${candidatePath}/SKILL.md`;
+    try {
+      await fetchWithRetry(skillMdUrl, 1, 100);
+      return candidatePath;
+    } catch {
+      if (!ghInfo) continue;
+
+      const apiUrl = `https://api.github.com/repos/${ghInfo.owner}/${ghInfo.repo}/contents/${candidatePath}/SKILL.md?ref=${ghInfo.branch}`;
+      try {
+        await fetchWithRetry(apiUrl, 1, 100);
+        return candidatePath;
+      } catch {
+        // Try the next candidate path.
+      }
+    }
+  }
+
+  throw new Error(`Skill "${skillName}" not found in the remote repository.`);
 }
 
 /**
@@ -192,7 +302,8 @@ async function installSkill(skillName, targetDir, options = {}) {
     // Download from remote using GitHub Contents API
     onProgress && onProgress('Downloading skill files...');
     mkdirp(skillTargetPath);
-    await downloadSkillDir(rawBase, skillName, skillTargetPath, '', ghInfo);
+    const remoteSkillPath = await resolveRemoteSkillPath(rawBase, skillName, ghInfo);
+    await downloadSkillDir(rawBase, skillName, skillTargetPath, '', ghInfo, remoteSkillPath);
     // Validate SKILL.md was successfully downloaded
     if (!fs.existsSync(path.join(skillTargetPath, 'SKILL.md'))) {
       fs.rmSync(skillTargetPath, { recursive: true, force: true });
@@ -239,6 +350,9 @@ module.exports = {
   getInstalledManifest,
   isInstalled,
   parseThirdPartyRef,
+  parseGitHubRepoInput,
+  buildThirdPartyInstallTarget,
+  getCandidateRemoteSkillPaths,
   mkdirp,
   copyDirRecursive,
   fetchWithRetry,

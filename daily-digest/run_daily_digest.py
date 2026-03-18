@@ -12,9 +12,9 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 try:
-    from shared.siyuan import save_automation_report
+    from shared.siyuan import save_named_automation_report
 except Exception:
-    save_automation_report = None
+    save_named_automation_report = None
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -214,14 +214,13 @@ def generate_daily_log(notes: list, notebooks: dict, github_events: list, today_
 # ── 写入思源笔记 ──────────────────────────────────────────────────────────────
 def write_to_siyuan(content: str, notebooks: dict) -> str:
     """在思源笔记中创建每日日志"""
-    if not save_automation_report:
+    if not save_named_automation_report:
         logger.error("❌ 共享思源模块不可用")
         return ""
     try:
-        result = save_automation_report(
+        result = save_named_automation_report(
+            route_key="daily_digest",
             markdown=content,
-            feature_name="效率复盘",
-            report_name="每日汇总",
             day=TODAY,
             title=f"每日汇总 {TODAY}",
         )

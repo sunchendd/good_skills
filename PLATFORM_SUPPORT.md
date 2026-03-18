@@ -7,6 +7,7 @@
 | 平台 | 识别文件 | 状态 | 备注 |
 |------|---------|------|------|
 | **Claude Code** | `CLAUDE.md`<br>`.claude/CLAUDE.md` | ✅ | 项目根目录和子目录都已配置 |
+| **Codex** | `AGENTS.md`<br>`.codex/AGENTS.md` | ⚠️ | 支持 Codex 规则文件，仓库可按需补充 |
 | **GitHub Copilot** | `.github/copilot-instructions.md` | ✅ | 不识别 CLAUDE.md，需要单独文件 |
 | **OpenCode** | `CLAUDE.md`<br>`.opencode/instructions.md` | ✅ | 两个位置都已配置 |
 | **Cursor** | `.cursor/rules` | ✅ | 已创建精简配置文件 |
@@ -24,6 +25,8 @@
 ```
 good_skills/
 ├── CLAUDE.md                          # Claude Code, OpenCode 主文档
+├── AGENTS.md                          # Codex 主文档（可选）
+├── .codex/AGENTS.md                   # Codex 项目级位置（可选）
 ├── .claude/CLAUDE.md                   # Claude Code 优先位置（符号链接）
 ├── .github/copilot-instructions.md     # GitHub Copilot, VS Code AI, JetBrains AI
 ├── .opencode/instructions.md          # OpenCode（符号链接）
@@ -45,6 +48,12 @@ good_skills/
 - 不识别 `CLAUDE.md`
 - 在 VS Code、GitHub.com、JetBrains IDEs 中使用
 - ✅ 完全支持
+
+### Codex
+- 识别 `AGENTS.md`
+- 也支持 `.codex/AGENTS.md`
+- skill 目录使用 `~/.codex/skills/` 或 `.codex/skills/`
+- ⚠️ 当前仓库还没有统一生成 Codex 规则文件，可按需补充
 
 ### OpenCode
 - 识别项目根目录的 `CLAUDE.md`
@@ -120,6 +129,7 @@ cp .cursor/rules .cursorrules  # 或定制化
 - ✅ Cursor (`--cursor`)
 - ✅ Windsurf (`--windsurf`)
 - ✅ Antigravity (`--antigravity`)
+- ✅ Codex (`--codex`)
 
 ```bash
 # 安装到所有支持的平台

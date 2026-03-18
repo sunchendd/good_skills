@@ -1,65 +1,34 @@
-const { loadRegistry, filterSkills } = require('../registry');
+const { loadRegistry } = require('../registry');
 const { resolvePaths } = require('../platforms');
-const { installSkill, parseThirdPartyRef } = require('../installer');
+const { installSkill, parseThirdPartyRef, buildThirdPartyInstallTarget } = require('../installer');
 
-async function installCommand(skill, options) {
-  const { all, platform, project } = options;
-
-  let registry;
-  try {
-    registry = await loadRegistry();
-  } catch (err) {
-    console.error('❌ Failed to load registry:', err.message);
-    process.exit(1);
-  }
-
+async function performInstall(skillsToInstall, options) {
+  const { platform, project } = options;
   const platformPaths = resolvePaths(platform, project);
-
-  // Determine which skills to install
-  let skillsToInstall = [];
-
-  if (all) {
-    skillsToInstall = Object.keys(registry.skills).map((name) => ({ name, thirdParty: false }));
-  } else if (skill) {
-    // Check if it's a third-party reference (owner/repo@skill-name)
-    if (skill.includes('/') && skill.includes('@')) {
-      const ref = parseThirdPartyRef(skill);
-      skillsToInstall = [{ name: ref.skill, thirdParty: true, rawBase: ref.rawBase }];
-    } else {
-      skillsToInstall = [{ name: skill, thirdParty: false }];
-    }
-  } else {
-    console.error('❌ Specify a skill name or use --all');
-    console.error('   Example: npx good-skills install git-commit');
-    console.error('   Example: npx good-skills install --all --platform claude');
-    process.exit(1);
-  }
-
   const total = skillsToInstall.length * platformPaths.length;
   let done = 0;
   let successCount = 0;
   let failCount = 0;
 
   if (skillsToInstall.length > 1) {
-    console.log(`\n📦 Installing ${skillsToInstall.length} skill(s) to ${platformPaths.length} platform(s)...\n`);
+    console.log(`\nInstalling ${skillsToInstall.length} skill(s) to ${platformPaths.length} platform(s)...\n`);
   }
 
   for (const { name, thirdParty, rawBase } of skillsToInstall) {
     for (const { name: platformName, path: platformPath } of platformPaths) {
       done++;
       const prefix = skillsToInstall.length > 1 ? `[${done}/${total}] ` : '  ';
-      process.stdout.write(`${prefix}Installing ${name} → ${platformName}... `);
+      process.stdout.write(`${prefix}Installing ${name} -> ${platformName}... `);
       try {
         await installSkill(name, platformPath, { thirdParty, rawBase });
-        console.log('✅');
+        console.log('OK');
         successCount++;
       } catch (err) {
-        console.log(`❌ ${err.message}`);
-        // Provide actionable hint for common errors
+        console.log(`ERROR ${err.message}`);
         if (err.message.includes('404') || err.message.includes('HTTP 404')) {
-          console.error(`     ℹ  Skill "${name}" not found. Run: npx good-skills list`);
+          console.error(`     Hint: Skill "${name}" not found. Run: npx good-skills list`);
         } else if (err.message.includes('Timeout') || err.message.includes('ENOTFOUND')) {
-          console.error(`     ℹ  Network error. Check your connection and try again.`);
+          console.error('     Hint: Network error. Check your connection and try again.');
         }
         failCount++;
       }
@@ -70,4 +39,43 @@ async function installCommand(skill, options) {
   if (failCount > 0) process.exit(1);
 }
 
-module.exports = { installCommand };
+async function installCommand(skill, options) {
+  const { all, ref } = options;
+  let skillsToInstall = [];
+
+  if (all) {
+    let registry;
+    try {
+      registry = await loadRegistry();
+    } catch (err) {
+      console.error('Failed to load registry:', err.message);
+      process.exit(1);
+    }
+    skillsToInstall = Object.keys(registry.skills).map((name) => ({ name, thirdParty: false }));
+  } else if (skill) {
+    try {
+      if (options.skill) {
+        skillsToInstall = [buildThirdPartyInstallTarget(skill, options.skill, ref)];
+      } else if (skill.includes('/') && skill.includes('@')) {
+        const parsedRef = parseThirdPartyRef(skill);
+        skillsToInstall = [{ name: parsedRef.skill, thirdParty: true, rawBase: parsedRef.rawBase }];
+      } else {
+        skillsToInstall = [{ name: skill, thirdParty: false }];
+      }
+    } catch (err) {
+      console.error(err.message);
+      process.exit(1);
+    }
+  } else {
+    console.error('Specify a skill name or use --all');
+    console.error('   Example: npx good-skills install git-commit');
+    console.error('   Example: npx good-skills install vercel-labs/skills@find-skills');
+    console.error('   Example: npx good-skills install https://github.com/vercel-labs/skills --skill find-skills');
+    console.error('   Example: npx good-skills install --all --platform claude');
+    process.exit(1);
+  }
+
+  await performInstall(skillsToInstall, options);
+}
+
+module.exports = { installCommand, performInstall };

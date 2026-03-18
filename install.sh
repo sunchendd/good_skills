@@ -45,6 +45,7 @@ Usage: $0 [OPTIONS]
      --opencode          Install to OpenCode (~/.config/opencode/skill/)
      --openclaw          Install to OpenClaw (~/.openclaw/skills/)
      --antigravity       Install to Antigravity (~/.agent/skills/) - used as default base
+     --codex             Install to Codex (~/.codex/skills/)
      --cursor            Install to Cursor (~/.cursor/skills/)
      --windsurf          Install to Windsurf (~/.codeium/windsurf/skills/)
      --global            Install globally (default)
@@ -85,6 +86,9 @@ get_global_path() {
         antigravity)
             echo "$HOME/.agent/skills"
             ;;
+        codex)
+            echo "$HOME/.codex/skills"
+            ;;
         cursor)
             echo "$HOME/.cursor/skills"
             ;;
@@ -114,6 +118,9 @@ get_project_path() {
             ;;
         antigravity)
             echo ".agent/skills"
+            ;;
+        codex)
+            echo ".codex/skills"
             ;;
         cursor)
             echo ".cursor/skills"
@@ -167,6 +174,10 @@ while [[ $# -gt 0 ]]; do
             PLATFORMS="$PLATFORMS antigravity"
             shift
             ;;
+        --codex)
+            PLATFORMS="$PLATFORMS codex"
+            shift
+            ;;
         --cursor)
             PLATFORMS="$PLATFORMS cursor"
             shift
@@ -213,7 +224,7 @@ done
 
 # If --all is specified, add all platforms
 if [ "$INSTALL_ALL" = true ]; then
-    PLATFORMS="github-copilot claude opencode openclaw antigravity cursor windsurf"
+    PLATFORMS="github-copilot claude opencode openclaw antigravity codex cursor windsurf"
 fi
 
 # Check if any platforms are selected

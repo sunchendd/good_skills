@@ -54,7 +54,7 @@ macOS / Linux:
 bash ./opensource/install.sh
 ```
 
-更新已安装的开源 skill:
+更新已安装的开源 skill：
 
 Windows:
 
@@ -66,6 +66,26 @@ macOS / Linux:
 
 ```bash
 bash ./opensource/update.sh
+```
+
+## CLI 安装示例
+
+```bash
+npx good-skills add https://github.com/vercel-labs/skills --skill find-skills
+npx good-skills add vercel-labs/skills --skill find-skills
+npx good-skills install vercel-labs/skills@find-skills
+npx good-skills install git-commit --platform codex
+```
+
+## 思源目录结构
+
+自动写入思源时，统一使用下面这四条目录：
+
+```text
+AI自动化/内容创作/无语哥日报/...
+AI自动化/效率复盘/每日汇总/...
+AI自动化/效率复盘/周报/...
+AI自动化/知识库维护/知识日报/...
 ```
 
 ## 常用环境变量
