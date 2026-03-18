@@ -35,6 +35,11 @@
 - Windows: [opensource/install.ps1](./opensource/install.ps1)
 - macOS / Linux: [opensource/install.sh](./opensource/install.sh)
 
+批量更新脚本：
+
+- Windows: [opensource/update.ps1](./opensource/update.ps1)
+- macOS / Linux: [opensource/update.sh](./opensource/update.sh)
+
 ## 使用方式
 
 Windows:
@@ -47,6 +52,20 @@ macOS / Linux:
 
 ```bash
 bash ./opensource/install.sh
+```
+
+更新已安装的开源 skill:
+
+Windows:
+
+```powershell
+pwsh .\opensource\update.ps1
+```
+
+macOS / Linux:
+
+```bash
+bash ./opensource/update.sh
 ```
 
 ## 常用环境变量

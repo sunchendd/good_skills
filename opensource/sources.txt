@@ -2,7 +2,7 @@
 # 空行和以 # 开头的行会被忽略
 
 # skills.sh / discover
-npx skills add https://github.com/evgyur/find-skills --skill find-skills -g -y
+npx skills add https://github.com/vercel-labs/skills --skill find-skills -g -y
 
 # obra/superpowers
 npx skills add https://github.com/obra/superpowers --skill brainstorming -g -y
@@ -12,8 +12,11 @@ npx skills add https://github.com/obra/superpowers --skill systematic-debugging 
 npx skills add https://github.com/obra/superpowers --skill verification-before-completion -g -y
 
 # inference / browser
-npx skills add https://github.com/inference-sh/agent-skills-registry --skill agent-browser -g -y
+npx skills add https://github.com/vercel-labs/agent-browser --skill agent-browser -g -y
 
 # other ecosystem skills
-npx skills add https://github.com/op7418/Humanizer-zh.git -g -y
+npx skills add https://github.com/op7418/humanizer-zh --skill humanizer-zh -g -y
 npx skills add https://github.com/atxp-dev/cli --skill atxp -g -y
+npx skills add https://github.com/anthropics/skills --skill frontend-design -g -y
+npx skills add https://github.com/anthropics/skills --skill skill-creator -g -y
+npx skills add https://github.com/remotion-dev/skills --skill remotion-best-practices -g -y

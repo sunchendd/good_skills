@@ -12,6 +12,8 @@
 - [sources.txt](./sources.txt)：一行一个 `npx skills add ...` 命令
 - [install.ps1](./install.ps1)：Windows 批量安装脚本
 - [install.sh](./install.sh)：macOS/Linux 批量安装脚本
+- [update.ps1](./update.ps1)：Windows 批量更新脚本
+- [update.sh](./update.sh)：macOS/Linux 批量更新脚本
 
 ## 用法
 
@@ -27,11 +29,26 @@ macOS / Linux:
 bash ./opensource/install.sh
 ```
 
+更新已安装的开源 skill:
+
+Windows:
+
+```powershell
+pwsh .\opensource\update.ps1
+```
+
+macOS / Linux:
+
+```bash
+bash ./opensource/update.sh
+```
+
 ## 更新方式
 
 1. 在 `sources.txt` 中新增、删除或调整开源 skill 安装命令
-2. 重新运行安装脚本
-3. 如需统一检查更新，可额外运行 `npx skills check` 或 `npx skills update`
+2. 初次拉取时运行安装脚本
+3. 日常更新时运行 `update.ps1` 或 `update.sh`
+4. 如需只检查版本状态，可额外运行 `npx skills check`
 
 ## 说明
 
