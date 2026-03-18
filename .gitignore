@@ -2,11 +2,7 @@
 .DS_Store
 .AppleDouble
 .LSOverride
-
-# Thumbnails
 ._*
-
-# Files that might appear in the root of a volume
 .DocumentRevisions-V100
 .fseventsd
 .Spotlight-V100
@@ -14,10 +10,32 @@
 .Trashes
 .VolumeIcon.icns
 .com.apple.timemachine.donotpresent
-
-# Directories potentially created on remote AFP share
 .AppleDB
 .AppleDesktop
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Local env
+.env
+.venv/
+venv/
+node_modules/
+
+# Generated content
+newsletters/
+notes/
+reports/
+logs/
+outfits/
+daily_tasks/
+*_results.json
+manifest.json
+thumbs_*/

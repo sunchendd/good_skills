@@ -1,4 +1,4 @@
----
+﻿---
 name: feishu-doc-skill
 description: Create, update, and manage Feishu cloud documents (docx) and convert local notes into cloud docs. Use when the user asks to save content to a Feishu document, create a shared cloud doc, or export workspace notes to Feishu.
 ---
@@ -19,7 +19,7 @@ Core usage patterns (short)
 
 Examples (what the user might say)
 - “创建一个飞书云文档，标题为：已安装技能汇总，内容为：<粘贴内容>”
-- “把 /Users/sunchendong/.openclaw/workspace/installed-skills-summary.md 的内容写入飞书文档并共享链接”
+- “把 /path/to/your/workspace/.openclaw/workspace/installed-skills-summary.md 的内容写入飞书文档并共享链接”
 - “在现有文档 D1urdGd8gozam4xoIi4cQgc1njh 后面追加下面内容：<内容>”
 
 Behavior rules (brief)
@@ -34,5 +34,4 @@ Examples of internal commands (for operator/automation)
 - feishu_doc.create(title="...", content="...")
 - feishu_doc.append(doc_token="D...", content="...")
 - feishu_doc.read(doc_token="D...")
-
 Reference: keep this SKILL.md short; put long examples or templates in references/ when needed.

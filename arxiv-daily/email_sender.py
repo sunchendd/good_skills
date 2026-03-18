@@ -18,11 +18,12 @@ class EmailSender:
     def __init__(self):
         self.smtp_server = "smtp.qq.com"
         self.smtp_port = 587
-        self.sender_email = "995943586@qq.com"
+        self.sender_email = os.environ.get("EMAIL_SENDER", "").strip()
         self.sender_password = os.environ.get("QQ_EMAIL_PASSWORD")
         self.recipients = [
-            "2464076118@qq.com",
-            "sunchend@outlook.com",
+            item.strip()
+            for item in os.environ.get("EMAIL_RECIPIENTS", "").split(",")
+            if item.strip()
         ]
 
     def markdown_to_html(self, md_content: str) -> str:
@@ -65,8 +66,8 @@ class EmailSender:
 </html>"""
 
     def send(self, md_content: str, subject: str) -> bool:
-        if not self.sender_password:
-            logger.error("❌ 未设置 QQ_EMAIL_PASSWORD")
+        if not self.sender_email or not self.recipients or not self.sender_password:
+            logger.error("❌ 未设置 EMAIL_SENDER / EMAIL_RECIPIENTS / QQ_EMAIL_PASSWORD")
             return False
         try:
             msg = MIMEMultipart("alternative")

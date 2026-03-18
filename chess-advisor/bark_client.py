@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from typing import Optional, Dict, Any
 
@@ -10,7 +10,7 @@ import httpx
 
 __all__ = ["bark_notify", "abark_notify", "build_bark_url", "send_bark_url", "asend_bark_url"]
 # 默认 Bark Token（当未传入且环境变量缺省时使用）
-DEFAULT_BARK_TOKEN = "seYne8cq4c7MkzqWqF2JPJ"
+DEFAULT_BARK_TOKEN = ""
 
 
 def build_bark_url(
@@ -233,10 +233,10 @@ async def asend_bark_url(url: str, timeout: float = 10.0) -> Dict[str, Any]:
 # 简单示例：
 # 1) 同步：
 # from bark_client import bark_notify
-# r = bark_notify(token="seYne8cq4c7MkzqWqF2JPJ", title="推送标题", body="这里改成你自己的推送内容")
+# r = bark_notify(token="your-bark-token", title="推送标题", body="这里改成你自己的推送内容")
 # print(r)
 #
 # 2) 异步：
 # import asyncio
 # from bark_client import abark_notify
-# asyncio.run(abark_notify(token="seYne8cq4c7MkzqWqF2JPJ", body="异步消息"))
+# asyncio.run(abark_notify(token="your-bark-token", body="异步消息"))

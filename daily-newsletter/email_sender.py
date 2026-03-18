@@ -14,6 +14,7 @@ import datetime
 import markdown
 from pathlib import Path
 import logging
+import os
 
 # 配置日志
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -25,7 +26,7 @@ class EmailSender:
         # QQ邮箱SMTP配置
         self.smtp_server = "smtp.qq.com"
         self.smtp_port = 587  # 使用TLS
-        self.sender_email = "995943586@qq.com"  # 发送方邮箱
+        self.sender_email = os.environ.get("EMAIL_SENDER", "").strip()  # 发送方邮箱
         self.sender_password = None  # 需要设置授权码
         
     def set_credentials(self, password: str):
@@ -145,11 +146,15 @@ class EmailSender:
     def send_newsletter(self, newsletter_path: Path, subject_prefix: str = "") -> bool:
         """发送早报邮件"""
         # 定义收件人列表
-        to_emails = ["2464076118@qq.com", "sunchend@outlook.com"]
+        to_emails = [
+            item.strip()
+            for item in os.environ.get("EMAIL_RECIPIENTS", "").split(",")
+            if item.strip()
+        ]
         
         try:
-            if not self.sender_password:
-                logger.error("未设置邮箱授权码")
+            if not self.sender_email or not to_emails or not self.sender_password:
+                logger.error("未设置 EMAIL_SENDER / EMAIL_RECIPIENTS / QQ_EMAIL_PASSWORD")
                 return False
                 
             # 读取早报内容
@@ -206,8 +211,8 @@ class EmailSender:
     def test_connection(self) -> bool:
         """测试邮箱连接"""
         try:
-            if not self.sender_password:
-                logger.error("未设置邮箱授权码")
+            if not self.sender_email or not self.sender_password:
+                logger.error("未设置 EMAIL_SENDER / QQ_EMAIL_PASSWORD")
                 return False
                 
             logger.info("测试邮箱连接...")

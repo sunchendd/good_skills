@@ -2,7 +2,7 @@
   "name": "dev-agent-skills",
   "owner": {
     "name": "Francesco Vadicamo",
-    "email": "fvadicamo@gmail.com"
+    "email": "maintainer@example.com"
   },
   "metadata": {
     "description": "Agent skills for development workflows - Git, GitHub, and skill authoring",

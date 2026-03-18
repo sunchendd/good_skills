@@ -238,10 +238,10 @@ def send_email(content, subject):
     from email.mime.text import MIMEText
     from email.mime.multipart import MIMEMultipart
     import markdown as md
-    sender = "995943586@qq.com"
-    recipients = ["2464076118@qq.com", "sunchend@outlook.com"]
+    sender = os.environ.get("EMAIL_SENDER", "").strip()
+    recipients = [item.strip() for item in os.environ.get("EMAIL_RECIPIENTS", "").split(",") if item.strip()]
     password = os.environ.get("QQ_EMAIL_PASSWORD")
-    if not password: return False
+    if not sender or not recipients or not password: return False
     html_body = md.markdown(content, extensions=['markdown.extensions.tables','markdown.extensions.nl2br'])
     html = f"""<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
 body{{font-family:-apple-system,'PingFang SC',sans-serif;line-height:1.7;color:#333;max-width:800px;margin:0 auto;padding:20px;background:#f5f5f5}}

@@ -138,8 +138,14 @@ def save_to_siyuan(title: str, content: str, path: Optional[str] = None):
         print('思源未配置，跳过保存')
         return None
     client = SiyuanClient(host=cfg.siyuan_host, token=cfg.siyuan_token)
-    doc_path = path or f'/无语哥选题/{title[:10]}'
-    res = client.create_or_update_doc(path=doc_path, title=title, content=content)
+    doc_name = (path or title[:10]).strip("/").split("/")[-1]
+    res = client.create_automation_doc(
+        feature_name="内容创作",
+        report_name="无语哥日报",
+        doc_name=doc_name,
+        markdown=content,
+        title=title,
+    )
     return res
 
 

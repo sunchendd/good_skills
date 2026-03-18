@@ -1,1 +1,1 @@
-/Users/sunchendong/Desktop/good_skills/CLAUDE.md
+﻿/path/to/your/workspace/Desktop/good_skills/CLAUDE.md

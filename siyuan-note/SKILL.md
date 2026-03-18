@@ -1,4 +1,4 @@
----
+﻿---
 name: siyuan-note
 description: >-
   SiYuan Note API integration for managing personal knowledge base. Use when performing operations on SiYuan Note instances:
@@ -21,8 +21,8 @@ export SIYUAN_TOKEN="your-api-token"
 
 ### 公网访问（远程服务器）
 
-```YUAN_HOST="bash
-export SIhttp://www.sunchendong.com:6806"
+```bash
+export SIYUAN_HOST="http://your-siyuan.example.com:6806"
 export SIYUAN_TOKEN="your-api-token"
 ```
 
@@ -323,7 +323,7 @@ See [references/api_reference.md](references/api_reference.md) for complete API 
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `SIYUAN_HOST` | SiYuan Note server URL | `http://127.0.0.1:6806` (本地) 或 `http://www.sunchendong.com:6806` (公网) |
+| `SIYUAN_HOST` | SiYuan Note server URL | `http://127.0.0.1:6806` (本地) 或 `http://your-siyuan.example.com:6806` (公网) |
 | `SIYUAN_TOKEN` | API authentication token | (required) |
 
 ## 公网访问配置
@@ -333,7 +333,7 @@ See [references/api_reference.md](references/api_reference.md) for complete API 
 
 ```bash
 # 公网域名访问
-export SIYUAN_HOST="http://www.sunchendong.com:6806"
+export SIYUAN_HOST="http://your-siyuan.example.com:6806"
 export SIYUAN_TOKEN="你的Token"
 ```
 
@@ -349,7 +349,7 @@ export SIYUAN_TOKEN="你的Token"
 ```nginx
 server {
     listen 443 ssl;
-    server_name www.sunchendong.com;
+    server_name your-siyuan.example.com;
 
     ssl_certificate /path/to/ssl/cert.pem;
     ssl_certificate_key /path/to/ssl/key.pem;
@@ -364,7 +364,7 @@ server {
 
 配置 HTTPS 后使用：
 ```bash
-export SIYUAN_HOST="https://www.sunchendong.com"
+export SIYUAN_HOST="https://your-siyuan.example.com"
 ```
 
 ## Troubleshooting

@@ -8,11 +8,20 @@ import urllib.request, urllib.parse, json, os, sys, logging, datetime, re
 from pathlib import Path
 from openai import OpenAI
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+try:
+    from shared.siyuan import save_automation_report
+except Exception:
+    save_automation_report = None
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 OUTPUT_DIR = Path(__file__).parent / "notes"
-SIYUAN_HOST = os.environ.get("SIYUAN_HOST", "http://192.168.3.32:6806")
+SIYUAN_HOST = os.environ.get("SIYUAN_HOST", "http://127.0.0.1:6806")
 SIYUAN_TOKEN = os.environ.get("SIYUAN_TOKEN", "")
 TODAY = datetime.date.today().strftime("%Y-%m-%d")
 TODAY_ZH = datetime.datetime.now().strftime("%Y年%m月%d日")
@@ -260,10 +269,10 @@ def send_email(content, subject):
     from email.mime.text import MIMEText
     from email.mime.multipart import MIMEMultipart
     import markdown as md
-    sender = "995943586@qq.com"
-    recipients = ["2464076118@qq.com", "sunchend@outlook.com"]
+    sender = os.environ.get("EMAIL_SENDER", "").strip()
+    recipients = [item.strip() for item in os.environ.get("EMAIL_RECIPIENTS", "").split(",") if item.strip()]
     password = os.environ.get("QQ_EMAIL_PASSWORD")
-    if not password: return False
+    if not sender or not recipients or not password: return False
     html_body = md.markdown(content, extensions=['markdown.extensions.tables','markdown.extensions.nl2br'])
     html = f"""<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
 body{{font-family:-apple-system,'PingFang SC',sans-serif;line-height:1.7;color:#333;max-width:800px;margin:0 auto;padding:20px;background:#fff0f5}}
@@ -298,25 +307,19 @@ def send_bark(title, body):
 
 
 def save_to_siyuan(content: str):
+    if not save_automation_report:
+        logger.warning("共享思源模块不可用，跳过思源写入")
+        return ""
     try:
-        # 找笔记本（优先找带"AI开发"或第一个）
-        req = urllib.request.Request(f"{SIYUAN_HOST}/api/notebook/lsNotebooks",
-            data=b'{}', headers={"Authorization": f"Token {SIYUAN_TOKEN}", "Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=10) as r:
-            nbs = json.loads(r.read())['data']['notebooks']
-        nb_id = nbs[0]['id']  # 用第一个笔记本
-        for nb in nbs:
-            if any(k in nb['name'] for k in ['AI开发','工具','日志','无语','创作']):
-                nb_id = nb['id']; break
-
-        path = f"/无语哥选题/{TODAY}"
-        req2 = urllib.request.Request(f"{SIYUAN_HOST}/api/filetree/createDocWithMd",
-            data=json.dumps({"notebook": nb_id, "path": path, "markdown": content}).encode(),
-            headers={"Authorization": f"Token {SIYUAN_TOKEN}", "Content-Type": "application/json"})
-        with urllib.request.urlopen(req2, timeout=10) as r:
-            result = json.loads(r.read())
-        doc_id = result.get('data', '')
-        logger.info(f"✅ 思源笔记创建: {path} ({doc_id})")
+        result = save_automation_report(
+            markdown=content,
+            feature_name="内容创作",
+            report_name="无语哥日报",
+            day=TODAY,
+            title=f"无语哥日报 {TODAY}",
+        )
+        doc_id = result.get("doc_id", "")
+        logger.info("✅ 思源笔记创建: /内容创作/无语哥日报/%s (%s)", TODAY, doc_id)
         return doc_id
     except Exception as e:
         logger.error(f"❌ 思源失败: {e}")

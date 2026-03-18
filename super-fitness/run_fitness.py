@@ -14,10 +14,10 @@ def send_email(content, subject):
     from email.mime.multipart import MIMEMultipart
     import markdown as md_lib
 
-    sender = "995943586@qq.com"
-    recipients = ["2464076118@qq.com", "sunchend@outlook.com"]
+    sender = os.environ.get("EMAIL_SENDER", "").strip()
+    recipients = [item.strip() for item in os.environ.get("EMAIL_RECIPIENTS", "").split(",") if item.strip()]
     password = os.environ.get("QQ_EMAIL_PASSWORD")
-    if not password: return False
+    if not sender or not recipients or not password: return False
 
     html_body = md_lib.markdown(content, extensions=['markdown.extensions.tables','markdown.extensions.nl2br'])
     html = f"""<!DOCTYPE html><html><head><meta charset="UTF-8">

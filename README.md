@@ -1,70 +1,70 @@
-# 🦞 OpenClaw 自建 Skill 合集
+# good_skills
 
-12 个个人定制 skill，覆盖日常生活、内容创作、学术追踪、开发监控全场景。
+这个仓库现在按两类内容维护：
 
-## 技能概览
+- 根目录：自研 skill、共享代码、发布脚本、文档
+- [opensource](./opensource/)：第三方开源 skill 的安装来源和批量安装脚本
 
-### 📡 信息聚合（每日推送）
+## 当前策略
 
-| Skill | 时间 | 功能 |
-|-------|------|------|
-| [daily-newsletter](./daily-newsletter/) | 08:30 | 27+ RSS源科技早报 |
-| [arxiv-daily](./arxiv-daily/) | 09:00 | arXiv AI 论文精选 |
-| [vibe-daily](./vibe-daily/) | 09:30 | AI 编程工具动态 |
-| [bili-daily](./bili-daily/) | 10:00 | B站+小红书视频精选 |
+### 自研 skill
 
-### 🎯 内容创作
+保留在仓库根目录，例如：
 
-| Skill | 时间 | 功能 |
-|-------|------|------|
-| [wuyu-xiaohongshu](./wuyu-xiaohongshu/) | 11:00 | 无语哥小红书内容生成 |
+- [daily-newsletter](./daily-newsletter/)
+- [arxiv-daily](./arxiv-daily/)
+- [vibe-daily](./vibe-daily/)
+- [bili-daily](./bili-daily/)
+- [wuyu-xiaohongshu](./wuyu-xiaohongshu/)
+- [daily-digest](./daily-digest/)
+- [weekly-report](./weekly-report/)
+- [siyuan-daily](./siyuan-daily/)
+- [super-fitness](./super-fitness/)
+- [super-wardrobe](./super-wardrobe/)
 
-### 💡 生活助手
+### 开源 skill
 
-| Skill | 时间 | 功能 |
-|-------|------|------|
-| [super-fitness](./super-fitness/) | 07:00 | 三个月减脂计划+每日任务 |
-| [super-wardrobe](./super-wardrobe/) | 07:30 | 天气穿搭建议 |
-| [chess-advisor](./chess-advisor/) | 按需 | 中国象棋局面分析 |
+不再把第三方 skill 源码长期 vendoring 到仓库里，而是通过 `skills.sh` 推荐方式统一安装。
 
-### 🔧 开发工具
+安装清单在：
 
-| Skill | 时间 | 功能 |
-|-------|------|------|
-| [github-watcher](./github-watcher/) | 每2h | GitHub 仓库监控 |
-| [tts-skill](./tts-skill/) | 按需 | 中文语音合成 |
+- [opensource/sources.txt](./opensource/sources.txt)
 
-### 📊 数据聚合
+批量安装脚本：
 
-| Skill | 时间 | 功能 |
-|-------|------|------|
-| [daily-digest](./daily-digest/) | 23:00 | 每日全数据汇总→思源笔记 |
-| [weekly-report](./weekly-report/) | 周六20:00 | AI 周报→思源笔记 |
+- Windows: [opensource/install.ps1](./opensource/install.ps1)
+- macOS / Linux: [opensource/install.sh](./opensource/install.sh)
 
-## 通用依赖
+## 使用方式
 
-```bash
-pip install openai requests feedparser beautifulsoup4 markdown edge-tts
+Windows:
+
+```powershell
+pwsh .\opensource\install.ps1
 ```
 
-## 通用环境变量
+macOS / Linux:
 
 ```bash
-export DEEPSEEK_API_KEY="sk-..."        # 大多数 skill 必需
-export QQ_EMAIL_PASSWORD="..."           # 邮件推送
-export GITHUB_TOKEN="ghp_..."           # GitHub 相关
-export SIYUAN_HOST="http://..."         # 思源笔记
-export SIYUAN_TOKEN="..."               # 思源笔记
-export BARK_TOKEN="..."                 # iOS Bark 推送
+bash ./opensource/install.sh
 ```
 
-## 推送渠道
+## 常用环境变量
 
-所有 skill 支持多渠道推送：
-- 📧 **QQ 邮箱** → HTML 格式邮件
-- 📱 **Bark** → iOS 推送通知
-- 📚 **思源笔记** → 知识库归档
+```bash
+export DEEPSEEK_API_KEY="your-deepseek-api-key"
+export QQ_EMAIL_PASSWORD="your-qq-smtp-code"
+export GITHUB_TOKEN="your-github-token"
+export SIYUAN_HOST="http://127.0.0.1:6806"
+export SIYUAN_TOKEN="your-siyuan-token"
+export SIYUAN_AUTOMATION_NOTEBOOK="AI自动化"
+export EMAIL_SENDER="your-email@example.com"
+export EMAIL_RECIPIENTS="first@example.com,second@example.com"
+export BARK_TOKEN="your-bark-token"
+```
 
----
+## 说明
 
-*Built with OpenClaw + DeepSeek · 2026*
+- `shared/` 中维护自研 skill 复用的公共逻辑
+- `packages/cli/` 中维护 `good-skills` 的 npm CLI 包
+- `docs/plans/` 中保留设计与实施记录

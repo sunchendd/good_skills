@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 SiYuan Note API helper script - Enhanced version
 
@@ -18,8 +18,8 @@ from typing import Dict, List, Optional, Tuple
 
 # Default configuration
 # 本地访问: http://127.0.0.1:6806
-# 公网访问: http://www.sunchendong.com:6806 (替换为你的域名)
-DEFAULT_HOST = os.environ.get("SIYUAN_HOST", "http://www.sunchendong.com:6806")
+# 公网访问: http://your-siyuan.example.com:6806 (替换为你的域名)
+DEFAULT_HOST = os.environ.get("SIYUAN_HOST", "http://127.0.0.1:6806")
 DEFAULT_TOKEN = os.environ.get("SIYUAN_TOKEN", "")
 
 

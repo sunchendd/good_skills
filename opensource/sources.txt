@@ -1,0 +1,19 @@
+# 每行一个开源 skill 安装命令
+# 空行和以 # 开头的行会被忽略
+
+# skills.sh / discover
+npx skills add https://github.com/evgyur/find-skills --skill find-skills -g -y
+
+# obra/superpowers
+npx skills add https://github.com/obra/superpowers --skill brainstorming -g -y
+npx skills add https://github.com/obra/superpowers --skill writing-plans -g -y
+npx skills add https://github.com/obra/superpowers --skill test-driven-development -g -y
+npx skills add https://github.com/obra/superpowers --skill systematic-debugging -g -y
+npx skills add https://github.com/obra/superpowers --skill verification-before-completion -g -y
+
+# inference / browser
+npx skills add https://github.com/inference-sh/agent-skills-registry --skill agent-browser -g -y
+
+# other ecosystem skills
+npx skills add https://github.com/op7418/Humanizer-zh.git -g -y
+npx skills add https://github.com/atxp-dev/cli --skill atxp -g -y

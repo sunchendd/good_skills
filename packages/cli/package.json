@@ -1,11 +1,15 @@
 {
   "name": "good-skills",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "CLI package manager for Good Skills - install, update, and manage AI agent skills",
   "main": "src/index.js",
   "bin": {
     "good-skills": "bin/good-skills.js"
   },
+  "files": [
+    "bin",
+    "src"
+  ],
   "scripts": {
     "test": "node --test src/**/*.test.js"
   },
@@ -29,5 +33,8 @@
     "type": "git",
     "url": "git+https://github.com/sunchendd/good_skills.git",
     "directory": "packages/cli"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

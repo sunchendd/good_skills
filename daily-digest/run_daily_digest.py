@@ -7,10 +7,19 @@ import urllib.request, json, os, sys, logging, datetime
 from pathlib import Path
 from openai import OpenAI
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+try:
+    from shared.siyuan import save_automation_report
+except Exception:
+    save_automation_report = None
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-SIYUAN_HOST = os.environ.get("SIYUAN_HOST", "http://192.168.3.32:6806")
+SIYUAN_HOST = os.environ.get("SIYUAN_HOST", "http://127.0.0.1:6806")
 SIYUAN_TOKEN = os.environ.get("SIYUAN_TOKEN", "")
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
 DEEPSEEK_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
@@ -205,28 +214,19 @@ def generate_daily_log(notes: list, notebooks: dict, github_events: list, today_
 # ── 写入思源笔记 ──────────────────────────────────────────────────────────────
 def write_to_siyuan(content: str, notebooks: dict) -> str:
     """在思源笔记中创建每日日志"""
-    # 找到"日志"或第一个笔记本
-    target_nb = None
-    for nb_id, nb_name in notebooks.items():
-        if any(k in nb_name for k in ["日志", "日记", "每日", "Daily", "记录"]):
-            target_nb = nb_id
-            break
-    if not target_nb and notebooks:
-        target_nb = list(notebooks.keys())[0]
-
-    if not target_nb:
-        logger.error("❌ 未找到可用笔记本")
+    if not save_automation_report:
+        logger.error("❌ 共享思源模块不可用")
         return ""
-
-    path = f"/每日日志/{TODAY}"
     try:
-        result = siyuan_post("/api/filetree/createDocWithMd", {
-            "notebook": target_nb,
-            "path": path,
-            "markdown": content,
-        })
-        doc_id = result.get("data", "")
-        logger.info(f"✅ 思源笔记创建成功: {path} (id: {doc_id})")
+        result = save_automation_report(
+            markdown=content,
+            feature_name="效率复盘",
+            report_name="每日汇总",
+            day=TODAY,
+            title=f"每日汇总 {TODAY}",
+        )
+        doc_id = result.get("doc_id", "")
+        logger.info("✅ 思源笔记创建成功: /效率复盘/每日汇总/%s (id: %s)", TODAY, doc_id)
         return doc_id
     except Exception as e:
         logger.error(f"❌ 思源写入失败: {e}")

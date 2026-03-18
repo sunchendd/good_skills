@@ -12,10 +12,19 @@
 import urllib.request, json, os, sys, logging, datetime, re
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+try:
+    from shared.siyuan import save_automation_report
+except Exception:
+    save_automation_report = None
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-SIYUAN_HOST = os.environ.get("SIYUAN_HOST", "http://192.168.3.32:6806")
+SIYUAN_HOST = os.environ.get("SIYUAN_HOST", "http://127.0.0.1:6806")
 SIYUAN_TOKEN = os.environ.get("SIYUAN_TOKEN", "")
 TODAY = datetime.date.today().strftime("%Y-%m-%d")
 TODAY_ZH = datetime.datetime.now().strftime("%Y年%m月%d日")
@@ -164,19 +173,19 @@ def build_daily_knowledge_note(notebooks: dict, today_notes: list) -> str:
 
 def create_or_update_siyuan(content: str, notebooks: dict) -> str:
     """创建思源知识库日志"""
-    # 优先找 AI开发 笔记本
-    target_nb = list(notebooks.keys())[0] if notebooks else ""
-    for nb_id, nb_name in notebooks.items():
-        if any(k in nb_name for k in ['AI开发', '知识库', '日志', '工具']):
-            target_nb = nb_id; break
-
-    path = f"/每日知识库/{TODAY}"
+    if not save_automation_report:
+        logger.error("❌ 共享思源模块不可用")
+        return ""
     try:
-        result = siyuan_post("/api/filetree/createDocWithMd", {
-            "notebook": target_nb, "path": path, "markdown": content
-        })
-        doc_id = result.get("data", "")
-        logger.info(f"✅ 思源知识库日志创建: {path} ({doc_id})")
+        result = save_automation_report(
+            markdown=content,
+            feature_name="知识库维护",
+            report_name="知识日报",
+            day=TODAY,
+            title=f"知识日报 {TODAY}",
+        )
+        doc_id = result.get("doc_id", "") if isinstance(result, dict) else ""
+        logger.info("✅ 思源知识库日志创建: /知识库维护/知识日报/%s (%s)", TODAY, doc_id)
         return doc_id
     except Exception as e:
         logger.error(f"❌ 思源写入失败: {e}")

@@ -8,10 +8,19 @@ import subprocess, urllib.request, json, os, sys, re, logging, datetime
 from pathlib import Path
 from openai import OpenAI
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+try:
+    from shared.siyuan import save_automation_report
+except Exception:
+    save_automation_report = None
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-SIYUAN_HOST = os.environ.get("SIYUAN_HOST", "http://192.168.3.32:6806")
+SIYUAN_HOST = os.environ.get("SIYUAN_HOST", "http://127.0.0.1:6806")
 SIYUAN_TOKEN = os.environ.get("SIYUAN_TOKEN", "")
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
 OUTPUT_DIR = Path(__file__).parent / "reports"
@@ -252,22 +261,19 @@ def format_full_report(ai_content: str, data: dict) -> str:
 
 
 def save_to_siyuan(content: str):
+    if not save_automation_report:
+        logger.warning("共享思源模块不可用，跳过思源写入")
+        return
     try:
-        req = urllib.request.Request(f"{SIYUAN_HOST}/api/notebook/lsNotebooks",
-            data=b'{}', headers={"Authorization": f"Token {SIYUAN_TOKEN}", "Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=10) as r:
-            nbs = json.loads(r.read())['data']['notebooks']
-        nb_id = nbs[0]['id']
-        for nb in nbs:
-            if any(k in nb['name'] for k in ['AI开发','日志','知识库','工具']):
-                nb_id = nb['id']; break
-        path = f"/周报/{week_start.strftime('%Y年第%W周')}"
-        req2 = urllib.request.Request(f"{SIYUAN_HOST}/api/filetree/createDocWithMd",
-            data=json.dumps({"notebook": nb_id, "path": path, "markdown": content}).encode(),
-            headers={"Authorization": f"Token {SIYUAN_TOKEN}", "Content-Type": "application/json"})
-        with urllib.request.urlopen(req2, timeout=10) as r:
-            result = json.loads(r.read())
-        logger.info(f"✅ 思源周报已创建: {path}")
+        doc_name = f"{week_start.strftime('%Y-%m-%d')}_第{WEEK_NUM}周"
+        result = save_automation_report(
+            markdown=content,
+            feature_name="效率复盘",
+            report_name="周报",
+            doc_name=doc_name,
+            title=f"第{WEEK_NUM}周周报",
+        )
+        logger.info("✅ 思源周报已创建: /效率复盘/周报/%s (%s)", doc_name, result.get("doc_id", ""))
     except Exception as e:
         logger.error(f"❌ 思源失败: {e}")
 
@@ -277,10 +283,10 @@ def send_email(content, subject):
     from email.mime.text import MIMEText
     from email.mime.multipart import MIMEMultipart
     import markdown as md
-    sender = "995943586@qq.com"
-    recipients = ["2464076118@qq.com", "sunchend@outlook.com"]
+    sender = os.environ.get("EMAIL_SENDER", "").strip()
+    recipients = [item.strip() for item in os.environ.get("EMAIL_RECIPIENTS", "").split(",") if item.strip()]
     password = os.environ.get("QQ_EMAIL_PASSWORD")
-    if not password: return False
+    if not sender or not recipients or not password: return False
     html_body = md.markdown(content, extensions=['markdown.extensions.tables','markdown.extensions.nl2br'])
     html = f"""<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
 body{{font-family:-apple-system,'PingFang SC',sans-serif;line-height:1.8;color:#333;max-width:860px;margin:0 auto;padding:20px;background:#f9f9f9}}

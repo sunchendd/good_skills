@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any
+﻿from typing import Optional, Dict, Any
 
 import os
 import urllib.parse
@@ -39,7 +39,7 @@ class NotifyRequest(BaseModel):
 
 
 def _build_bark_url(payload: NotifyRequest) -> str:
-    token = payload.token or os.getenv("BARK_TOKEN") or "seYne8cq4c7MkzqWqF2JPJ"
+    token = payload.token or os.getenv("BARK_TOKEN") or ""
 
     # Path segments with URL encoding
     # Bark 允许 /{token}/{body} 或 /{token}/{title}/{body}
@@ -120,7 +120,7 @@ async def notify(payload: NotifyRequest):
 # 1) 安装依赖：
 #    pip install fastapi uvicorn httpx
 # 2) 设置环境变量（可选，如果不在请求体提供 token）：
-#    export BARK_TOKEN="seYne8cq4c7MkzqWqF2JPJ"
+#    export BARK_TOKEN="your-bark-token"
 # 3) 启动服务：
 #    uvicorn bark_api:app --reload
 #
@@ -128,7 +128,7 @@ async def notify(payload: NotifyRequest):
 # curl -X POST http://127.0.0.1:8000/notify \
 #   -H "Content-Type: application/json" \
 #   -d '{
-#     "token": "seYne8cq4c7MkzqWqF2JPJ",
+#     "token": "your-bark-token",
 #     "title": "推送标题",
 #     "body": "这里改成你自己的推送内容"
 #   }'
@@ -136,64 +136,64 @@ async def notify(payload: NotifyRequest):
 # 铃声：
 # curl -X POST http://127.0.0.1:8000/notify \
 #   -H "Content-Type: application/json" \
-#   -d '{"token":"seYne8cq4c7MkzqWqF2JPJ","body":"推送铃声","sound":"minuet"}'
+#   -d '{"token":"your-bark-token","body":"推送铃声","sound":"minuet"}'
 #
 # 持续响铃：
 # curl -X POST http://127.0.0.1:8000/notify \
 #   -H "Content-Type: application/json" \
-#   -d '{"token":"seYne8cq4c7MkzqWqF2JPJ","body":"持续响铃","call":1}'
+#   -d '{"token":"your-bark-token","body":"持续响铃","call":1}'
 #
 # 自动保存：
 # curl -X POST http://127.0.0.1:8000/notify \
 #   -H "Content-Type: application/json" \
-#   -d '{"token":"seYne8cq4c7MkzqWqF2JPJ","body":"自动保存通知消息","isArchive":1}'
+#   -d '{"token":"your-bark-token","body":"自动保存通知消息","isArchive":1}'
 #
 # 自定义图标：
 # curl -X POST http://127.0.0.1:8000/notify \
 #   -H "Content-Type: application/json" \
-#   -d '{"token":"seYne8cq4c7MkzqWqF2JPJ","title":"自定义推送图标","body":"内容","icon":"https://day.app/assets/images/avatar.jpg"}'
+#   -d '{"token":"your-bark-token","title":"自定义推送图标","body":"内容","icon":"https://day.app/assets/images/avatar.jpg"}'
 #
 # 分组：
 # curl -X POST http://127.0.0.1:8000/notify \
 #   -H "Content-Type: application/json" \
-#   -d '{"token":"seYne8cq4c7MkzqWqF2JPJ","title":"推送消息分组","body":"内容","group":"groupName"}'
+#   -d '{"token":"your-bark-token","title":"推送消息分组","body":"内容","group":"groupName"}'
 #
 # 加密（ciphertext）：
 # curl -X POST http://127.0.0.1:8000/notify \
 #   -H "Content-Type: application/json" \
-#   -d '{"token":"seYne8cq4c7MkzqWqF2JPJ","title":"推送加密","body":"内容","ciphertext":"ciphertext"}'
+#   -d '{"token":"your-bark-token","title":"推送加密","body":"内容","ciphertext":"ciphertext"}'
 #
 # 重要警告：
 # curl -X POST http://127.0.0.1:8000/notify \
 #   -H "Content-Type: application/json" \
-#   -d '{"token":"seYne8cq4c7MkzqWqF2JPJ","title":"重要警告","body":"内容","level":"critical","volume":5}'
+#   -d '{"token":"your-bark-token","title":"重要警告","body":"内容","level":"critical","volume":5}'
 #
 # 时效性通知：
 # curl -X POST http://127.0.0.1:8000/notify \
 #   -H "Content-Type: application/json" \
-#   -d '{"token":"seYne8cq4c7MkzqWqF2JPJ","title":"时效性通知","body":"内容","level":"timeSensitive"}'
+#   -d '{"token":"your-bark-token","title":"时效性通知","body":"内容","level":"timeSensitive"}'
 #
 # URL 跳转：
 # curl -X POST http://127.0.0.1:8000/notify \
 #   -H "Content-Type: application/json" \
-#   -d '{"token":"seYne8cq4c7MkzqWqF2JPJ","title":"URL Test","body":"内容","url":"https://www.baidu.com"}'
+#   -d '{"token":"your-bark-token","title":"URL Test","body":"内容","url":"https://www.baidu.com"}'
 #
 # 图片推送：
 # curl -X POST http://127.0.0.1:8000/notify \
 #   -H "Content-Type: application/json" \
-#   -d '{"token":"seYne8cq4c7MkzqWqF2JPJ","title":"图片推送通知","body":"内容","image":"https://day.app/assets/images/avatar.jpg"}'
+#   -d '{"token":"your-bark-token","title":"图片推送通知","body":"内容","image":"https://day.app/assets/images/avatar.jpg"}'
 #
 # Copy：
 # curl -X POST http://127.0.0.1:8000/notify \
 #   -H "Content-Type: application/json" \
-#   -d '{"token":"seYne8cq4c7MkzqWqF2JPJ","title":"Copy Test","body":"内容","copy":"test"}'
+#   -d '{"token":"your-bark-token","title":"Copy Test","body":"内容","copy":"test"}'
 #
 # 角标：
 # curl -X POST http://127.0.0.1:8000/notify \
 #   -H "Content-Type: application/json" \
-#   -d '{"token":"seYne8cq4c7MkzqWqF2JPJ","title":"设置角标","body":"内容","badge":1}'
+#   -d '{"token":"your-bark-token","title":"设置角标","body":"内容","badge":1}'
 #
 # 自动复制：
 # curl -X POST http://127.0.0.1:8000/notify \
 #   -H "Content-Type: application/json" \
-#   -d '{"token":"seYne8cq4c7MkzqWqF2JPJ","title":"自动复制推送内容到剪切板","body":"内容","autoCopy":1,"copy":"optionalsaqwf rv c"}'
+#   -d '{"token":"your-bark-token","title":"自动复制推送内容到剪切板","body":"内容","autoCopy":1,"copy":"optionalsaqwf rv c"}'
