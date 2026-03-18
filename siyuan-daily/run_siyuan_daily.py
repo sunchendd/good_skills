@@ -184,7 +184,11 @@ def create_or_update_siyuan(content: str, notebooks: dict) -> str:
             title=f"知识日报 {TODAY}",
         )
         doc_id = result.get("doc_id", "") if isinstance(result, dict) else ""
-        logger.info("✅ 思源知识库日志创建: /知识库维护/知识日报/%s (%s)", TODAY, doc_id)
+        logger.info(
+            "✅ 思源知识库日志创建: /Knowledge Base Maintenance/Knowledge Daily Report/%s (%s)",
+            TODAY,
+            doc_id,
+        )
         return doc_id
     except Exception as e:
         logger.error(f"❌ 思源写入失败: {e}")

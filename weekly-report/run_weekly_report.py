@@ -265,14 +265,18 @@ def save_to_siyuan(content: str):
         logger.warning("共享思源模块不可用，跳过思源写入")
         return
     try:
-        doc_name = f"{week_start.strftime('%Y-%m-%d')}_第{WEEK_NUM}周"
+        doc_name = f"{week_start.strftime('%Y-%m-%d')}_W{WEEK_NUM:02d}"
         result = save_named_automation_report(
             route_key="weekly_report",
             markdown=content,
             doc_name=doc_name,
             title=f"第{WEEK_NUM}周周报",
         )
-        logger.info("✅ 思源周报已创建: /效率复盘/周报/%s (%s)", doc_name, result.get("doc_id", ""))
+        logger.info(
+            "✅ 思源周报已创建: /Efficiency Review/Weekly Report/%s (%s)",
+            doc_name,
+            result.get("doc_id", ""),
+        )
     except Exception as e:
         logger.error(f"❌ 思源失败: {e}")
 

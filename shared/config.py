@@ -17,7 +17,7 @@ class Config:
     github_token: str = ""
     siyuan_host: str = "http://127.0.0.1:6806"
     siyuan_token: str = ""
-    siyuan_automation_notebook: str = "AI自动化"
+    siyuan_automation_notebook: str = "AI Automation"
     bark_token: str = ""
     email_sender: str = ""
     email_recipients: list[str] = field(default_factory=list)
@@ -32,7 +32,7 @@ class Config:
             siyuan_token=os.environ.get("SIYUAN_TOKEN", ""),
             siyuan_automation_notebook=os.environ.get(
                 "SIYUAN_AUTOMATION_NOTEBOOK",
-                "AI自动化",
+                "AI Automation",
             ),
             bark_token=os.environ.get("BARK_TOKEN", ""),
             email_sender=os.environ.get("EMAIL_SENDER", "").strip(),

@@ -79,13 +79,13 @@ npx good-skills install git-commit --platform codex
 
 ## 思源目录结构
 
-自动写入思源时，统一使用下面这四条目录：
+自动写入思源时，为了避开中文路径乱码，统一使用下面这四条英文目录：
 
 ```text
-AI自动化/内容创作/无语哥日报/...
-AI自动化/效率复盘/每日汇总/...
-AI自动化/效率复盘/周报/...
-AI自动化/知识库维护/知识日报/...
+AI Automation/Content Creation/Wuyu Daily Report/...
+AI Automation/Efficiency Review/Daily Summary/...
+AI Automation/Efficiency Review/Weekly Report/...
+AI Automation/Knowledge Base Maintenance/Knowledge Daily Report/...
 ```
 
 ## 常用环境变量
@@ -96,7 +96,7 @@ export QQ_EMAIL_PASSWORD="your-qq-smtp-code"
 export GITHUB_TOKEN="your-github-token"
 export SIYUAN_HOST="http://127.0.0.1:6806"
 export SIYUAN_TOKEN="your-siyuan-token"
-export SIYUAN_AUTOMATION_NOTEBOOK="AI自动化"
+export SIYUAN_AUTOMATION_NOTEBOOK="AI Automation"
 export EMAIL_SENDER="your-email@example.com"
 export EMAIL_RECIPIENTS="first@example.com,second@example.com"
 export BARK_TOKEN="your-bark-token"

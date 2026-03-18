@@ -225,7 +225,11 @@ def write_to_siyuan(content: str, notebooks: dict) -> str:
             title=f"每日汇总 {TODAY}",
         )
         doc_id = result.get("doc_id", "")
-        logger.info("✅ 思源笔记创建成功: /效率复盘/每日汇总/%s (id: %s)", TODAY, doc_id)
+        logger.info(
+            "✅ 思源笔记创建成功: /Efficiency Review/Daily Summary/%s (id: %s)",
+            TODAY,
+            doc_id,
+        )
         return doc_id
     except Exception as e:
         logger.error(f"❌ 思源写入失败: {e}")

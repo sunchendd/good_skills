@@ -11,10 +11,13 @@ class AutomationRoute:
 
 
 AUTOMATION_ROUTES: dict[str, AutomationRoute] = {
-    "wuyu_daily": AutomationRoute("内容创作", "无语哥日报"),
-    "daily_digest": AutomationRoute("效率复盘", "每日汇总"),
-    "weekly_report": AutomationRoute("效率复盘", "周报"),
-    "knowledge_daily": AutomationRoute("知识库维护", "知识日报"),
+    "wuyu_daily": AutomationRoute("Content Creation", "Wuyu Daily Report"),
+    "daily_digest": AutomationRoute("Efficiency Review", "Daily Summary"),
+    "weekly_report": AutomationRoute("Efficiency Review", "Weekly Report"),
+    "knowledge_daily": AutomationRoute(
+        "Knowledge Base Maintenance",
+        "Knowledge Daily Report",
+    ),
 }
 
 
@@ -23,4 +26,6 @@ def get_automation_route(route_key: str) -> AutomationRoute:
         return AUTOMATION_ROUTES[route_key]
     except KeyError as exc:
         known = ", ".join(sorted(AUTOMATION_ROUTES))
-        raise KeyError(f"Unknown automation route: {route_key}. Expected one of: {known}") from exc
+        raise KeyError(
+            f"Unknown automation route: {route_key}. Expected one of: {known}"
+        ) from exc

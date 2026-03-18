@@ -318,7 +318,11 @@ def save_to_siyuan(content: str):
             title=f"无语哥日报 {TODAY}",
         )
         doc_id = result.get("doc_id", "")
-        logger.info("✅ 思源笔记创建: /内容创作/无语哥日报/%s (%s)", TODAY, doc_id)
+        logger.info(
+            "✅ 思源笔记创建: /Content Creation/Wuyu Daily Report/%s (%s)",
+            TODAY,
+            doc_id,
+        )
         return doc_id
     except Exception as e:
         logger.error(f"❌ 思源失败: {e}")

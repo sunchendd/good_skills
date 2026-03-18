@@ -20,7 +20,7 @@ class ConfigTests(unittest.TestCase):
             config = Config.from_env()
 
         self.assertEqual(config.siyuan_host, "http://127.0.0.1:6806")
-        self.assertEqual(config.siyuan_automation_notebook, "AI自动化")
+        self.assertEqual(config.siyuan_automation_notebook, "AI Automation")
         self.assertEqual(config.bark_token, "")
         self.assertEqual(config.email_sender, "")
         self.assertEqual(config.email_recipients, [])
@@ -44,36 +44,36 @@ class ConfigTests(unittest.TestCase):
 
 
 class SiyuanPathTests(unittest.TestCase):
-    def test_get_automation_route_returns_expected_chinese_structure(self) -> None:
+    def test_get_automation_route_returns_expected_english_structure(self) -> None:
         route = get_automation_route("wuyu_daily")
 
-        self.assertEqual(route.feature_name, "内容创作")
-        self.assertEqual(route.report_name, "无语哥日报")
+        self.assertEqual(route.feature_name, "Content Creation")
+        self.assertEqual(route.report_name, "Wuyu Daily Report")
 
-    def test_build_automation_path_uses_chinese_structure(self) -> None:
+    def test_build_automation_path_uses_english_structure(self) -> None:
         path = build_automation_path(
-            "效率复盘",
-            "每日汇总",
+            "Efficiency Review",
+            "Daily Summary",
             day=date(2026, 3, 18),
         )
-        self.assertEqual(path, "/效率复盘/每日汇总/2026-03-18")
+        self.assertEqual(path, "/Efficiency Review/Daily Summary/2026-03-18")
 
     def test_create_automation_doc_uses_built_path(self) -> None:
         client = SiyuanClient(host="http://127.0.0.1:6806", token="token")
         with patch.object(client, "ensure_notebook", return_value="nb-1") as ensure:
             with patch.object(client, "create_doc", return_value="doc-1") as create_doc:
                 result = client.create_automation_doc(
-                    feature_name="内容创作",
-                    report_name="无语哥日报",
+                    feature_name="Content Creation",
+                    report_name="Wuyu Daily Report",
                     doc_name="2026-03-18",
-                    markdown="# 内容",
+                    markdown="# Content",
                 )
 
         ensure.assert_called_once()
         create_doc.assert_called_once_with(
             "nb-1",
-            "/内容创作/无语哥日报/2026-03-18",
-            "# 内容",
+            "/Content Creation/Wuyu Daily Report/2026-03-18",
+            "# Content",
         )
         self.assertTrue(result["ok"])
         self.assertEqual(result["doc_id"], "doc-1")
@@ -83,21 +83,21 @@ class SiyuanPathTests(unittest.TestCase):
             client = client_cls.return_value
             client.create_automation_doc.return_value = {
                 "ok": True,
-                "path": "/内容创作/无语哥日报/2026-03-18",
+                "path": "/Content Creation/Wuyu Daily Report/2026-03-18",
                 "doc_id": "doc-2",
             }
 
             result = save_named_automation_report(
                 route_key="wuyu_daily",
-                markdown="# 内容",
+                markdown="# Content",
                 day=date(2026, 3, 18),
                 title="无语哥日报 2026-03-18",
             )
 
         client.create_automation_doc.assert_called_once_with(
-            feature_name="内容创作",
-            report_name="无语哥日报",
-            markdown="# 内容",
+            feature_name="Content Creation",
+            report_name="Wuyu Daily Report",
+            markdown="# Content",
             doc_name=None,
             day=date(2026, 3, 18),
             title="无语哥日报 2026-03-18",
