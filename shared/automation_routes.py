@@ -18,6 +18,11 @@ AUTOMATION_ROUTES: dict[str, AutomationRoute] = {
         "Knowledge Base Maintenance",
         "Knowledge Daily Report",
     ),
+    "arxiv_daily": AutomationRoute("Research Feeds", "arXiv Daily"),
+    "daily_newsletter": AutomationRoute("Research Feeds", "Daily Newsletter"),
+    "vibe_daily": AutomationRoute("Engineering Logs", "Vibe Daily"),
+    "fitness_daily": AutomationRoute("Personal Ops", "Fitness Daily"),
+    "wardrobe_daily": AutomationRoute("Personal Ops", "Wardrobe Daily"),
 }
 
 

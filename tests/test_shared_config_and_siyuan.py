@@ -50,6 +50,28 @@ class SiyuanPathTests(unittest.TestCase):
         self.assertEqual(route.feature_name, "Content Creation")
         self.assertEqual(route.report_name, "Wuyu Daily Report")
 
+    def test_get_automation_route_supports_extended_automation_groups(self) -> None:
+        self.assertEqual(
+            get_automation_route("arxiv_daily").feature_name,
+            "Research Feeds",
+        )
+        self.assertEqual(
+            get_automation_route("daily_newsletter").report_name,
+            "Daily Newsletter",
+        )
+        self.assertEqual(
+            get_automation_route("vibe_daily").feature_name,
+            "Engineering Logs",
+        )
+        self.assertEqual(
+            get_automation_route("fitness_daily").report_name,
+            "Fitness Daily",
+        )
+        self.assertEqual(
+            get_automation_route("wardrobe_daily").report_name,
+            "Wardrobe Daily",
+        )
+
     def test_build_automation_path_uses_english_structure(self) -> None:
         path = build_automation_path(
             "Efficiency Review",
