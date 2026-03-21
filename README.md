@@ -15,6 +15,9 @@ Self-developed AI agent skills with Python automation scripts.
 | [daily-digest](skills/daily-digest/) | 每日日志聚合。汇总所有 daily skill 输出 |
 | [patent-search](skills/patent-search/) | 专利搜索。多库检索、新颖性评估、侵权分析 |
 | [patent-specialist](skills/patent-specialist/) | 专利撰写。技术交底书 → 权利要求书 |
+| [siyuan-note](skills/siyuan-note/) | 思源笔记 API 集成。批量操作、知识库管理 |
+| [xhs-skill](skills/xhs-skill/) | 小红书检索与发布。基于 MCP Server |
+| [humanizer-zh](skills/humanizer-zh/) | 中文去 AI 痕迹。24 种模式检测与修复 |
 
 ## Install
 
