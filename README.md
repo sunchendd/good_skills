@@ -18,6 +18,8 @@ Self-developed AI agent skills with Python automation scripts.
 | [siyuan-note](skills/siyuan-note/) | 思源笔记 API 集成。批量操作、知识库管理 |
 | [xhs-skill](skills/xhs-skill/) | 小红书检索与发布。基于 MCP Server |
 | [humanizer-zh](skills/humanizer-zh/) | 中文去 AI 痕迹。24 种模式检测与修复 |
+| [find-skills](skills/find-skills/) | 技能发现与安装指南 |
+| [skill-creator](skills/skill-creator/) | 技能创建指南。结构、frontmatter、最佳实践 |
 
 ## Install
 
