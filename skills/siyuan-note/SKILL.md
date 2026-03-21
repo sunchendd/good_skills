@@ -1,11 +1,9 @@
 ﻿---
 name: siyuan-note
 description: >-
-  SiYuan Note API integration for managing personal knowledge base. Use when performing operations on SiYuan Note instances:
-  (1) Create, read, update, delete notes and documents, (2) Search and query content using SQL,
-  (3) Manage notebooks and file structure, (4) Work with blocks, attributes, and assets,
-  (5) Export documents or resources, (6) Batch operations and backups, (7) Document organization.
-  Requires SIYUAN_HOST and SIYUAN_TOKEN environment variables or user-provided configuration.
+  思源笔记 API 集成与知识库管理。Use when "思源笔记", "SiYuan Note", "知识库管理",
+  "笔记操作", "siyuan API". 支持笔记 CRUD、SQL 查询、批量操作、备份导出。
+  需要 SIYUAN_HOST 和 SIYUAN_TOKEN 环境变量。
 ---
 
 # SiYuan Note

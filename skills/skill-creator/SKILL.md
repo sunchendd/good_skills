@@ -1,7 +1,9 @@
 ---
 name: skill-creator
-description: Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Claude's capabilities with specialized knowledge, workflows, or tool integrations.
-license: Complete terms in LICENSE.txt
+description: >-
+  Guide for creating effective AI agent skills. Use when "创建新技能", "write a SKILL.md",
+  "create a skill", "new skill for", "update existing skill". Covers structure, frontmatter,
+  naming conventions, dynamic context injection, and subagent execution.
 ---
 
 # Skill Creator

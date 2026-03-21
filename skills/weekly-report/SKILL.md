@@ -1,6 +1,8 @@
 ---
 name: weekly-report
-description: 自动周报生成。汇总本周日历、思源笔记、GitHub 活动，AI 生成工作总结+时间分析+下周规划，写入思源笔记。
+description: >-
+  自动周报生成。Use when "周报", "本周工作总结", "weekly report", "自动生成周报".
+  汇总本周日历、思源笔记、GitHub 活动，AI 生成工作总结+时间分析+下周规划，写入思源笔记。
 ---
 
 # 📋 自动周报
