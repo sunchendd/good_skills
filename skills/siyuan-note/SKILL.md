@@ -1,4 +1,4 @@
-﻿---
+---
 name: siyuan-note
 description: >-
   思源笔记 API 集成与知识库管理。Use when "思源笔记", "SiYuan Note", "知识库管理",
