@@ -1,5 +1,18 @@
-openai
-httpx
-markdown
-beautifulsoup4
-feedparser
+# Good Skills - Python Dependencies
+
+# HTTP & networking
+httpx>=0.24.0
+requests>=2.31.0
+
+# Markdown & HTML parsing
+markdown>=3.4.0
+beautifulsoup4>=4.12.0
+
+# RSS feeds
+feedparser>=6.0.0
+
+# AI API (DeepSeek via OpenAI-compatible SDK)
+openai>=1.0.0
+
+# Task scheduling
+schedule>=1.2.0

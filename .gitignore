@@ -1,41 +1,21 @@
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
-._*
-.DocumentRevisions-V100
-.fseventsd
-.Spotlight-V100
-.TemporaryItems
-.Trashes
-.VolumeIcon.icns
-.com.apple.timemachine.donotpresent
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
+# Environment
+.env
+venv/
+.venv/
 
 # Python
 __pycache__/
 *.pyc
 *.pyo
-*.pyd
 .pytest_cache/
 
-# Local env
-.env
-.venv/
-venv/
-node_modules/
-
-# Generated content
+# Generated outputs
 newsletters/
-notes/
-reports/
-logs/
 outfits/
-daily_tasks/
 *_results.json
-manifest.json
-thumbs_*/
+
+# OS
+.DS_Store
+
+# Node (install.sh uses npx)
+node_modules/

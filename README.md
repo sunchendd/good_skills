@@ -1,109 +1,44 @@
-# good_skills
+# Good Skills
 
-这个仓库现在按两类内容维护：
+Self-developed AI agent skills with Python automation scripts.
 
-- 根目录：自研 skill、共享代码、发布脚本、文档
-- [opensource](./opensource/)：第三方开源 skill 的安装来源和批量安装脚本
+## Skills
 
-## 当前策略
+| Skill | Description |
+|-------|-------------|
+| [daily-newsletter](skills/daily-newsletter/) | 每日科技早报。27+ RSS 源聚合，智能分类，质量评分，邮件+Bark 推送 |
+| [arxiv-daily](skills/arxiv-daily/) | 每日 arXiv AI 论文精选。DeepSeek 评分筛选，中文摘要 |
+| [super-wardrobe](skills/super-wardrobe/) | 每日穿搭建议。实时天气 + AI 搭配方案 |
+| [patent-search](skills/patent-search/) | 专利搜索。多库检索、新颖性评估、侵权分析 |
+| [patent-specialist](skills/patent-specialist/) | 专利撰写。技术交底书 → 权利要求书 |
 
-### 自研 skill
-
-保留在仓库根目录，例如：
-
-- [daily-newsletter](./daily-newsletter/)
-- [arxiv-daily](./arxiv-daily/)
-- [vibe-daily](./vibe-daily/)
-- [bili-daily](./bili-daily/)
-- [wuyu-xiaohongshu](./wuyu-xiaohongshu/)
-- [daily-digest](./daily-digest/)
-- [weekly-report](./weekly-report/)
-- [siyuan-daily](./siyuan-daily/)
-- [super-fitness](./super-fitness/)
-- [super-wardrobe](./super-wardrobe/)
-
-### 开源 skill
-
-不再把第三方 skill 源码长期 vendoring 到仓库里，而是通过 `skills.sh` 推荐方式统一安装。
-
-安装清单在：
-
-- [opensource/sources.txt](./opensource/sources.txt)
-
-批量安装脚本：
-
-- Windows: [opensource/install.ps1](./opensource/install.ps1)
-- macOS / Linux: [opensource/install.sh](./opensource/install.sh)
-
-批量更新脚本：
-
-- Windows: [opensource/update.ps1](./opensource/update.ps1)
-- macOS / Linux: [opensource/update.sh](./opensource/update.sh)
-
-## 使用方式
-
-Windows:
-
-```powershell
-pwsh .\opensource\install.ps1
-```
-
-macOS / Linux:
+## Install
 
 ```bash
-bash ./opensource/install.sh
+git clone https://github.com/sunchendd/good-skills.git
+cd good-skills
+./install.sh
+cp .env.example .env  # Fill in API keys
 ```
 
-更新已安装的开源 skill：
+`install.sh` will:
+1. Install self-developed skills via `npx skills add .`
+2. Install [superpowers](https://github.com/obra/superpowers) workflows
+3. Install curated open-source skills (Next.js, React best practices)
+4. Install Python dependencies
 
-Windows:
+## Usage
 
-```powershell
-pwsh .\opensource\update.ps1
-```
+Skills are used by AI agents (Claude Code, etc.) automatically via SKILL.md trigger matching.
 
-macOS / Linux:
+Python automation scripts can also be run directly:
 
 ```bash
-bash ./opensource/update.sh
+python skills/daily-newsletter/run_daily_newsletter.py
+python skills/arxiv-daily/run_arxiv_daily.py
+python skills/super-wardrobe/run_wardrobe.py
 ```
 
-## CLI 安装示例
+## License
 
-```bash
-npx good-skills add https://github.com/vercel-labs/skills --skill find-skills
-npx good-skills add vercel-labs/skills --skill find-skills
-npx good-skills install vercel-labs/skills@find-skills
-npx good-skills install git-commit --platform codex
-```
-
-## 思源目录结构
-
-自动写入思源时，为了避开中文路径乱码，统一使用下面这四条英文目录：
-
-```text
-AI Automation/Content Creation/Wuyu Daily Report/...
-AI Automation/Efficiency Review/Daily Summary/...
-AI Automation/Efficiency Review/Weekly Report/...
-AI Automation/Knowledge Base Maintenance/Knowledge Daily Report/...
-```
-
-## 常用环境变量
-
-```bash
-export DEEPSEEK_API_KEY="your-deepseek-api-key"
-export QQ_EMAIL_PASSWORD="your-qq-smtp-code"
-export GITHUB_TOKEN="your-github-token"
-export SIYUAN_HOST="http://127.0.0.1:6806"
-export SIYUAN_TOKEN="your-siyuan-token"
-export SIYUAN_AUTOMATION_NOTEBOOK="AI Automation"
-export EMAIL_SENDER="your-email@example.com"
-export EMAIL_RECIPIENTS="first@example.com,second@example.com"
-export BARK_TOKEN="your-bark-token"
-```
-
-## 说明
-
-- `shared/` 中维护自研 skill 复用的公共逻辑
-- `packages/cli/` 中维护 `good-skills` 的 npm CLI 包
-- `docs/plans/` 中保留设计与实施记录
+MIT
