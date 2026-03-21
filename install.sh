@@ -3,17 +3,24 @@ set -e
 
 echo "=== Good Skills Installer ==="
 
-# Set GOOD_SKILLS_HOME to repo root
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# Add GOOD_SKILLS_HOME to shell profile if not already set
+# Parse flags
+UPDATE_MODE=false
+for arg in "$@"; do
+  case $arg in
+    --update) UPDATE_MODE=true ;;
+  esac
+done
+
+# Set GOOD_SKILLS_HOME
 if ! grep -q "GOOD_SKILLS_HOME" ~/.zshrc 2>/dev/null; then
   echo "export GOOD_SKILLS_HOME=$SCRIPT_DIR" >> ~/.zshrc
   echo "Added GOOD_SKILLS_HOME to ~/.zshrc"
 fi
 export GOOD_SKILLS_HOME="$SCRIPT_DIR"
 
-# 1. Install self-developed skills (SKILL.md -> ~/.claude/skills/)
+# 1. Install self-developed skills
 echo ""
 echo "[1/4] Installing self-developed skills..."
 npx skills add . -y -g
@@ -39,12 +46,36 @@ else
   pip3 install --user -r "$SCRIPT_DIR/requirements.txt"
 fi
 
-# Remind about .env
+# 5. Validate .env
 echo ""
 if [ ! -f "$SCRIPT_DIR/.env" ]; then
-  echo "WARNING: Copy .env.example to .env and fill in your API keys:"
+  echo "WARNING: .env not found. Copy and configure:"
   echo "  cp .env.example .env"
-  echo ""
+else
+  echo "[Env Check]"
+  MISSING=0
+  for VAR in OPENAI_API_KEY SMTP_USER SMTP_PASSWORD BARK_KEY; do
+    if ! grep -q "^${VAR}=.\+" "$SCRIPT_DIR/.env" 2>/dev/null; then
+      echo "  MISSING: $VAR"
+      MISSING=$((MISSING + 1))
+    fi
+  done
+  if [ $MISSING -eq 0 ]; then
+    echo "  All required env vars configured."
+  else
+    echo "  $MISSING required env var(s) not set in .env"
+  fi
 fi
 
+# 6. Run health check
+echo ""
+echo "[Health Check]"
+python3 "$SCRIPT_DIR/scripts/health_check.py" 2>/dev/null || echo "Health check skipped (run manually: python3 scripts/health_check.py)"
+
+echo ""
 echo "=== Installation complete ==="
+echo ""
+echo "Next steps:"
+echo "  - Configure .env with your API keys"
+echo "  - Import cron jobs: crontab crontab.example"
+echo "  - Run health check: python3 scripts/health_check.py"
