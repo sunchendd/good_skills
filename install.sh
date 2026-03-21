@@ -16,26 +16,28 @@ export GOOD_SKILLS_HOME="$SCRIPT_DIR"
 # 1. Install self-developed skills (SKILL.md -> ~/.claude/skills/)
 echo ""
 echo "[1/4] Installing self-developed skills..."
-npx skills add .
+npx skills add . -y -g
 
 # 2. Install superpowers workflows
 echo ""
 echo "[2/4] Installing superpowers..."
-npx skills add obra/superpowers
+npx skills add obra/superpowers -y -g
 
 # 3. Install curated open-source skills
 echo ""
 echo "[3/4] Installing curated open-source skills..."
-npx skills add vercel-labs/skills -s next-best-practices
-npx skills add vercel-labs/skills -s react-best-practices
-# Uncomment as needed:
-# npx skills add vercel-labs/skills -s supabase-postgres-best-practices
-# npx skills add vercel-labs/skills -s remotion-best-practices
+# Add more as needed:
+# npx skills add <owner>/<repo> -y -g
+echo "No additional open-source skills configured. Edit install.sh to add."
 
 # 4. Install Python dependencies
 echo ""
 echo "[4/4] Installing Python dependencies..."
-pip install -r "$SCRIPT_DIR/requirements.txt"
+if command -v uv &>/dev/null; then
+  uv pip install -r "$SCRIPT_DIR/requirements.txt"
+else
+  pip3 install --user -r "$SCRIPT_DIR/requirements.txt"
+fi
 
 # Remind about .env
 echo ""
