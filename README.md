@@ -20,6 +20,8 @@ Self-developed AI agent skills with Python automation scripts.
 | [humanizer-zh](skills/humanizer-zh/) | 中文去 AI 痕迹。24 种模式检测与修复 |
 | [find-skills](skills/find-skills/) | 技能发现与安装指南 |
 | [skill-creator](skills/skill-creator/) | 技能创建指南。结构、frontmatter、最佳实践 |
+| [vllm-dev](skills/vllm-dev/) | vLLM 推理引擎开发。推测解码(Eagle3/MTP)、KV Cache 优化、Attention Backend 实现 |
+| [vllm-test](skills/vllm-test/) | vLLM 性能测试。基准测试、吞吐/延迟对比、evalscope、回归检测 |
 
 ## Install
 
