@@ -1,6 +1,6 @@
 {
   "name": "good-skills",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Self-developed AI agent skills with daily push notifications (Bark + Email)",
   "bin": {
     "good-skills": "bin/good-skills.js"
