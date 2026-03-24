@@ -41,7 +41,7 @@ echo "No additional open-source skills configured. Edit install.sh to add."
 echo ""
 echo "[4/4] Installing Python dependencies..."
 if command -v uv &>/dev/null; then
-  uv pip install -r "$SCRIPT_DIR/requirements.txt"
+  uv pip install --system -r "$SCRIPT_DIR/requirements.txt"
 else
   pip3 install --user -r "$SCRIPT_DIR/requirements.txt"
 fi
