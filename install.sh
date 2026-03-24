@@ -54,7 +54,7 @@ if [ ! -f "$SCRIPT_DIR/.env" ]; then
 else
   echo "[Env Check]"
   MISSING=0
-  for VAR in OPENAI_API_KEY SMTP_USER SMTP_PASSWORD BARK_KEY; do
+  for VAR in DEEPSEEK_API_KEY GITHUB_TOKEN BARK_TOKEN EMAIL_SENDER EMAIL_RECIPIENTS QQ_EMAIL_PASSWORD; do
     if ! grep -q "^${VAR}=.\+" "$SCRIPT_DIR/.env" 2>/dev/null; then
       echo "  MISSING: $VAR"
       MISSING=$((MISSING + 1))
@@ -77,5 +77,5 @@ echo "=== Installation complete ==="
 echo ""
 echo "Next steps:"
 echo "  - Configure .env with your API keys"
-echo "  - Import cron jobs: crontab crontab.example"
+echo "  - Run a skill: npm run fitness"
 echo "  - Run health check: python3 scripts/health_check.py"

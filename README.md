@@ -25,6 +25,27 @@ Self-developed AI agent skills with Python automation scripts.
 
 ## Install
 
+**Option 1: npx (no install required)**
+
+```bash
+npx good-skills run fitness
+npx good-skills run wardrobe
+npx good-skills run newsletter
+npx good-skills run arxiv
+npx good-skills run vibe
+npx good-skills run weekly
+npx good-skills run digest
+```
+
+**Option 2: global install**
+
+```bash
+npm install -g good-skills
+good-skills run fitness
+```
+
+**Option 3: clone & setup**
+
 ```bash
 git clone https://github.com/sunchendd/good-skills.git
 cd good-skills
@@ -40,15 +61,20 @@ cp .env.example .env  # Fill in API keys
 
 ## Usage
 
-Skills are used by AI agents (Claude Code, etc.) automatically via SKILL.md trigger matching.
-
-Python automation scripts can also be run directly:
+**npm scripts (after clone):**
 
 ```bash
-python skills/daily-newsletter/run_daily_newsletter.py
-python skills/arxiv-daily/run_arxiv_daily.py
-python skills/super-wardrobe/run_wardrobe.py
+npm run fitness     # 💪 健身计划
+npm run wardrobe    # 👔 穿搭建议
+npm run newsletter  # 📰 科技早报
+npm run arxiv       # 🔬 arXiv 论文精选
+npm run vibe        # 🚀 AI 编程工具动态
+npm run weekly      # 📋 周报生成
+npm run digest      # 📊 日志聚合
+npm run all         # 🚀 一键运行全部早报任务
 ```
+
+Skills are also used by AI agents (Claude Code, etc.) automatically via SKILL.md trigger matching.
 
 ## License
 

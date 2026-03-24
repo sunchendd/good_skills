@@ -25,6 +25,8 @@ WATCH_REPOS = [
     {"repo": "getcursor/cursor",              "label": "Cursor",          "npm": None},
     {"repo": "cline/cline",                   "label": "Cline",           "npm": None},
     {"repo": "opencode-ai/opencode",          "label": "OpenCode",        "npm": None},
+    {"repo": "openai/codex",                  "label": "OpenAI Codex",    "npm": None},
+    {"repo": "google-gemini/gemini-cli",      "label": "Gemini CLI",      "npm": None},
 ]
 
 SEARCH_KEYWORDS = [
@@ -69,9 +71,12 @@ def fetch_tool_updates() -> list[dict]:
                 logger.info(f"  {w['label']}: 无公开 releases")
                 continue
             latest = releases[0]
-            tag = latest.get("tag_name", "")
-            published = latest.get("published_at", "")[:10]
-            body = latest.get("body", "")[:500]
+            if not latest or not isinstance(latest, dict):
+                logger.info(f"  {w['label']}: release 数据异常，跳过")
+                continue
+            tag = latest.get("tag_name") or ""
+            published = (latest.get("published_at") or "")[:10]
+            body = (latest.get("body") or "")[:500]
             # 检查是否是近7天内发布的
             from datetime import timedelta
             pub_date = datetime.date.fromisoformat(published) if published else None

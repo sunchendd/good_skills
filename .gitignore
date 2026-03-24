@@ -9,10 +9,15 @@ __pycache__/
 *.pyo
 .pytest_cache/
 
-# Generated outputs
+# Generated outputs (all skill output dirs)
 newsletters/
 outfits/
+daily_tasks/
+reports/
+logs/
+archive/
 *_results.json
+*.log
 
 # OS
 .DS_Store

@@ -27,7 +27,8 @@ logger = logging.getLogger(__name__)
 def main():
     test_mode = "--test" in sys.argv
     no_send = "--no-send" in sys.argv
-    max_fetch = 20 if test_mode else 100
+    max_fetch = 20 if test_mode else 30
+    max_output = 5  # 每日推送论文数量
 
     logger.info("=" * 60)
     logger.info("🔬 arXiv AI 论文每日精选 开始运行")
@@ -45,6 +46,7 @@ def main():
 
     # 2. 精选（DeepSeek）
     selected = select_papers_with_deepseek(papers)
+    selected = selected[:max_output]  # 只取评分最高的 top N
     if not selected:
         logger.error("❌ 未精选到论文，退出")
         sys.exit(1)
