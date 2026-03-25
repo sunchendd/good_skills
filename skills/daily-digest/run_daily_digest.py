@@ -261,9 +261,15 @@ def main():
     sys.path.insert(0, str(Path(__file__).parent))
     try:
         from bark_client import bark_notify
+        # 提取今日新笔记标题作为摘要
+        note_titles = [n.get("content", n.get("title", ""))[:30] for n in notes[:3] if n]
+        bark_lines = [f"📝 新笔记{len(notes)}条  🐙 GitHub{len(github_events)}条"]
+        for t in note_titles:
+            if t:
+                bark_lines.append(f"• {t}")
         bark_notify(
             title=f"📅 {TODAY_ZH} 每日日志已生成",
-            body=f"新笔记{len(notes)}条 · GitHub{len(github_events)}条 · 已写入思源",
+            body="\n".join(bark_lines),
             sound="minuet", group="digest"
         )
     except Exception as e:

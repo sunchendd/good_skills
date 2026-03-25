@@ -36,14 +36,19 @@ th{{background:#f0fff4}}hr{{border:none;border-top:1px solid #eee;margin:20px 0}
     msg["Subject"] = subject; msg["From"] = sender; msg["To"] = ", ".join(recipients)
     msg.attach(MIMEText(content, "plain", "utf-8"))
     msg.attach(MIMEText(html, "html", "utf-8"))
-    try:
-        ctx = ssl.create_default_context()
-        with smtplib.SMTP("smtp.qq.com", 587) as s:
-            s.ehlo(); s.starttls(context=ctx); s.login(sender, password)
-            s.sendmail(sender, recipients, msg.as_bytes())
-        logger.info(f"✅ 邮件发送成功"); return True
-    except Exception as e:
-        logger.error(f"❌ 邮件失败: {e}"); return False
+    import time
+    for attempt in range(3):
+        try:
+            ctx = ssl.create_default_context()
+            with smtplib.SMTP_SSL("smtp.qq.com", 465, context=ctx) as s:
+                s.login(sender, password)
+                s.sendmail(sender, recipients, msg.as_bytes())
+            logger.info(f"✅ 邮件发送成功"); return True
+        except Exception as e:
+            if attempt < 2:
+                logger.warning(f"⚠️ 邮件发送失败，重试 {attempt+1}/2: {e}"); time.sleep(3)
+            else:
+                logger.error(f"❌ 邮件失败: {e}"); return False
 
 def send_bark(title, body):
     try:
@@ -83,9 +88,22 @@ def main():
 
     today = datetime.datetime.now().strftime("%Y年%m月%d日")
     send_email(content, f"💪 今日健身任务 {today} · 第{day_num}天")
+    # 从生成内容里提取关键摘要
+    import re as _re
+    goal_m = _re.search(r'\*\*今日目标[：:]\*\*\s*(.+)', content)
+    cal_m = _re.search(r'今日总热量[：:].*?约\s*([\d,，]+)\s*kcal', content)
+    type_m = _re.search(r'###\s*(.+?日)\s*·', content)
+    goal_line = goal_m.group(1).strip()[:60] if goal_m else ""
+    cal_line = f"🔥 {cal_m.group(1)} kcal" if cal_m else ""
+    type_line = type_m.group(1).strip() if type_m else f"第{week_num}周训练"
+    bark_lines = [f"第{day_num}天 · {type_line}"]
+    if goal_line:
+        bark_lines.append(f"🎯 {goal_line}")
+    if cal_line:
+        bark_lines.append(cal_line)
     send_bark(
         title=f"💪 今日健身任务 · 第{day_num}天",
-        body=f"目标：90kg→70kg | 第{week_num}周 | 查看今日运动和饮食计划"
+        body="\n".join(bark_lines)
     )
     logger.info("🎉 Super 健身运行完成")
 

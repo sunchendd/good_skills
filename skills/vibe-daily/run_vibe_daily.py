@@ -351,14 +351,19 @@ p,li{{color:#e6edf3}}
     msg["Subject"] = subject; msg["From"] = sender; msg["To"] = ", ".join(recipients)
     msg.attach(MIMEText(content, "plain", "utf-8"))
     msg.attach(MIMEText(html, "html", "utf-8"))
-    try:
-        ctx = ssl.create_default_context()
-        with smtplib.SMTP("smtp.qq.com", 587) as s:
-            s.ehlo(); s.starttls(context=ctx); s.login(sender, password)
-            s.sendmail(sender, recipients, msg.as_bytes())
-        logger.info("✅ 邮件发送成功"); return True
-    except Exception as e:
-        logger.error(f"❌ 邮件失败: {e}"); return False
+    import time
+    for attempt in range(3):
+        try:
+            ctx = ssl.create_default_context()
+            with smtplib.SMTP_SSL("smtp.qq.com", 465, context=ctx) as s:
+                s.login(sender, password)
+                s.sendmail(sender, recipients, msg.as_bytes())
+            logger.info("✅ 邮件发送成功"); return True
+        except Exception as e:
+            if attempt < 2:
+                logger.warning(f"⚠️ 邮件发送失败，重试 {attempt+1}/2: {e}"); time.sleep(3)
+            else:
+                logger.error(f"❌ 邮件失败: {e}"); return False
 
 
 def send_bark(title, body):
@@ -391,9 +396,16 @@ def main():
 
     recent_count = len([u for u in tool_updates if u.get('is_recent')])
     send_email(newsletter, f"🚀 Vibe Coding日报 {TODAY_ZH} | {recent_count}个工具更新")
+    # 提取最新工具版本摘要
+    recent = [u for u in tool_updates if u.get('is_recent')]
+    bark_lines = [f"🆕 {len(recent)} 个工具近期更新"]
+    for u in recent[:3]:
+        ver = f" {u.get('version','')}" if u.get('version') else ""
+        log = u.get('changelog', '')[:40].replace('\n', ' ')
+        bark_lines.append(f"• {u['tool']}{ver}: {log}")
     send_bark(
         title=f"🚀 Vibe Coding日报 {TODAY_ZH}",
-        body=f"{recent_count}个工具有近期更新 · Claude Code/Copilot/Cursor动态"
+        body="\n".join(bark_lines)
     )
     logger.info("🎉 完成")
 

@@ -859,9 +859,20 @@ class DailyNewsletterGenerator:
         try:
             from bark_client import bark_notify
 
-            title = "每日科技早报已生成"
-            body = f"{newsletter_path.name} 已生成于 {datetime.datetime.now().strftime('%H:%M:%S')}"
-            # 不显式传 token，走 bark_client 默认（环境变量或固定默认值）
+            # 从文件内容提取各分类第一条标题作为摘要
+            import re as _re
+            try:
+                raw = newsletter_path.read_text(encoding="utf-8")
+                # 找所有 h3 级别标题（新闻条目）
+                headlines = _re.findall(r'^###\s+(.+)', raw, _re.MULTILINE)
+                total = len(headlines)
+                # 取前 3 条去掉 markdown 符号
+                top = [_re.sub(r'[*_`]', '', h).strip()[:40] for h in headlines[:3]]
+                summary = "\n".join(f"• {h}" for h in top)
+                body = f"今日 {total} 条资讯\n{summary}" if top else f"今日早报已生成"
+            except Exception:
+                body = f"今日早报已生成 {datetime.datetime.now().strftime('%H:%M')}"
+            title = f"📰 每日科技早报 {datetime.datetime.now().strftime('%m/%d')}"
             resp = bark_notify(title=title, body=body, sound="minuet", autoCopy=1, copy="打开文件查看详情")
 
             # 正确的成功判断：ok 或 response.code == 200 或 HTTP status_code < 400

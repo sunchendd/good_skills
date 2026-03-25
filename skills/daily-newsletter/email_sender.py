@@ -185,28 +185,22 @@ class EmailSender:
             msg.attach(MIMEText(markdown_content, 'plain', 'utf-8'))
             msg.attach(MIMEText(html_content, 'html', 'utf-8'))
             
-            # 发送邮件
             logger.info(f"正在发送邮件到 {', '.join(to_emails)}...")
-            
-            context = ssl.create_default_context()
-            with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
-                server.starttls(context=context)
-                server.login(self.sender_email, self.sender_password)
-                server.send_message(msg, to_addrs=to_emails)
-            
-            logger.info("✅ 邮件发送成功！")
-            return True
-            
-        except smtplib.SMTPException as e:
-            # 特殊处理QQ邮箱的 "(-1, b'')" 错误，它实际上表示成功
-            if e.args and len(e.args) > 1 and e.args[0] == -1 and e.args[1] == b'\x00\x00\x00':
-                logger.info("✅ 邮件发送成功！(忽略QQ邮箱特殊返回码)")
-                return True
-            logger.error(f"❌ 邮件发送失败: {e}")
-            return False
-        except Exception as e:
-            logger.error(f"❌ 邮件发送时发生未知错误: {e}")
-            return False
+            import time
+            for attempt in range(3):
+                try:
+                    context = ssl.create_default_context()
+                    with smtplib.SMTP_SSL(self.smtp_server, 465, context=context) as server:
+                        server.login(self.sender_email, self.sender_password)
+                        server.send_message(msg, to_addrs=to_emails)
+                    logger.info("✅ 邮件发送成功！")
+                    return True
+                except Exception as e:
+                    if attempt < 2:
+                        logger.warning(f"⚠️ 邮件发送失败，重试 {attempt+1}/2: {e}"); time.sleep(3)
+                    else:
+                        logger.error(f"❌ 邮件发送失败: {e}")
+                        return False
     
     def test_connection(self) -> bool:
         """测试邮箱连接"""

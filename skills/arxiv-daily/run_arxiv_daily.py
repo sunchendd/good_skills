@@ -78,9 +78,15 @@ def main():
     # 7. Bark 推送
     logger.info("🔔 发送 Bark 推送...")
     try:
+        top3 = selected[:3]
+        paper_lines = [f"今日精选 {len(selected)} 篇"]
+        for i, p in enumerate(top3, 1):
+            zh = p.get("zh_title") or p.get("en_title", "")
+            score = p.get("score", 0)
+            paper_lines.append(f"{i}. [{score:.2f}] {zh[:35]}")
         bark_notify(
             title=f"🔬 arXiv AI 论文精选 {today}",
-            body=f"今日精选 {len(selected)} 篇论文，已发送至邮箱",
+            body="\n".join(paper_lines),
             sound="minuet",
             group="arxiv",
         )

@@ -40,15 +40,19 @@ hr{{border:none;border-top:1px solid #eee;margin:20px 0}}
     msg["To"] = ", ".join(recipients)
     msg.attach(MIMEText(content, "plain", "utf-8"))
     msg.attach(MIMEText(html, "html", "utf-8"))
-    try:
-        ctx = ssl.create_default_context()
-        with smtplib.SMTP("smtp.qq.com", 587) as s:
-            s.ehlo(); s.starttls(context=ctx)
-            s.login(sender, password)
-            s.sendmail(sender, recipients, msg.as_bytes())
-        logger.info(f"✅ 邮件已发送 → {recipients}"); return True
-    except Exception as e:
-        logger.error(f"❌ 邮件失败: {e}"); return False
+    import time
+    for attempt in range(3):
+        try:
+            ctx = ssl.create_default_context()
+            with smtplib.SMTP_SSL("smtp.qq.com", 465, context=ctx) as s:
+                s.login(sender, password)
+                s.sendmail(sender, recipients, msg.as_bytes())
+            logger.info(f"✅ 邮件已发送 → {recipients}"); return True
+        except Exception as e:
+            if attempt < 2:
+                logger.warning(f"⚠️ 邮件发送失败，重试 {attempt+1}/2: {e}"); time.sleep(3)
+            else:
+                logger.error(f"❌ 邮件失败: {e}"); return False
 
 def send_bark(title, body):
     import sys
@@ -86,9 +90,26 @@ def main():
     temp_range = f"{weather['temp_min']}~{weather['temp_max']}°C"
 
     send_email(content, f"👔 今日穿搭建议 {today} | {weather['weather_desc']} {temp_range}")
+    # 从 outfit 文本提取上衣/裤子/鞋子推荐
+    import re as _re
+    def _extract_item(text, section):
+        m = _re.search(rf'#{{{2,3}}}\s*{section}[^\n]*\n(.*?)(?=\n#{2,3}|\Z)', text, _re.DOTALL)
+        if not m: return ""
+        lines = [l.strip() for l in m.group(1).splitlines() if l.strip() and not l.strip().startswith('#')]
+        first = lines[0] if lines else ""
+        # 去掉 markdown 加粗
+        first = _re.sub(r'\*\*([^*]+)\*\*', r'\1', first)
+        return first[:40]
+    top = _extract_item(outfit, '上衣')
+    pants = _extract_item(outfit, '裤子')
+    shoes = _extract_item(outfit, '鞋子')
+    outfit_lines = [f"🌡 {weather['weather_desc']} {temp_range} | {umbrella}"]
+    if top:   outfit_lines.append(f"👕 {top}")
+    if pants: outfit_lines.append(f"👖 {pants}")
+    if shoes: outfit_lines.append(f"👟 {shoes}")
     send_bark(
         title=f"👔 今日穿搭建议 {today}",
-        body=f"{weather['weather_desc']} {temp_range} | 降雨{weather['rain_chance']}% | {umbrella}"
+        body="\n".join(outfit_lines)
     )
     logger.info("🎉 Super 衣橱运行完成")
 

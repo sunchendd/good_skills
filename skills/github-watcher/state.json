@@ -1,0 +1,73 @@
+{
+  "vllm_ascend_latest_release": "v0.17.0rc1",
+  "deepseek_known_repos": [
+    "DeepSeek-OCR-2",
+    "Engram",
+    "DeepSeek-Math-V2",
+    "LPLB",
+    "DeepSeek-OCR",
+    "DeepSeek-V3.2-Exp",
+    "DeepSeek-Prover-V2",
+    "3FS",
+    "DualPipe",
+    "EPLB"
+  ],
+  "known_prs": {
+    "vllm-project/vllm": [
+      38038,
+      38039,
+      38040,
+      38043,
+      38045,
+      38046,
+      38047,
+      38048,
+      38049,
+      38050,
+      38052,
+      38053,
+      38054,
+      38055,
+      38057,
+      38058,
+      38059,
+      38060,
+      38061,
+      38062,
+      38065,
+      38066,
+      38067,
+      38068,
+      38070,
+      38072,
+      38073,
+      38074
+    ],
+    "vllm-project/vllm-ascend": [
+      7581,
+      7583,
+      7584,
+      7586,
+      7588,
+      7590,
+      7594,
+      7596,
+      7597,
+      7602,
+      7603,
+      7607,
+      7610,
+      7612,
+      7614,
+      7617,
+      7618,
+      7619,
+      7623,
+      7627
+    ]
+  },
+  "latest_releases": {
+    "vllm-project_vllm": "v0.18.0",
+    "vllm-project_vllm-ascend": "v0.17.0rc1"
+  }
+}

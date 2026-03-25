@@ -68,6 +68,7 @@ Daily tasks run via macOS LaunchAgent (more reliable than cron on macOS):
 | 06:40 | daily-newsletter |
 | 07:00 | arxiv-daily |
 | 07:30 | vibe-daily |
+| 09/12/15/18/21:00 | github-watcher |
 | 22:50 | archive |
 | 23:00 | daily-digest |
 | Sat 20:00 | weekly-report |

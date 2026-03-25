@@ -305,14 +305,19 @@ blockquote{{background:#fffbf0;border-left:4px solid #f0b429;padding:8px 16px;bo
     msg["Subject"] = subject; msg["From"] = sender; msg["To"] = ", ".join(recipients)
     msg.attach(MIMEText(content, "plain", "utf-8"))
     msg.attach(MIMEText(html, "html", "utf-8"))
-    try:
-        ctx = ssl.create_default_context()
-        with smtplib.SMTP("smtp.qq.com", 587) as s:
-            s.ehlo(); s.starttls(context=ctx); s.login(sender, password)
-            s.sendmail(sender, recipients, msg.as_bytes())
-        logger.info("✅ 邮件发送成功"); return True
-    except Exception as e:
-        logger.error(f"❌ 邮件失败: {e}"); return False
+    import time
+    for attempt in range(3):
+        try:
+            ctx = ssl.create_default_context()
+            with smtplib.SMTP_SSL("smtp.qq.com", 465, context=ctx) as s:
+                s.login(sender, password)
+                s.sendmail(sender, recipients, msg.as_bytes())
+            logger.info("✅ 邮件发送成功"); return True
+        except Exception as e:
+            if attempt < 2:
+                logger.warning(f"⚠️ 邮件发送失败，重试 {attempt+1}/2: {e}"); time.sleep(3)
+            else:
+                logger.error(f"❌ 邮件失败: {e}"); return False
 
 
 def main():

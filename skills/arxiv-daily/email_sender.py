@@ -69,22 +69,25 @@ class EmailSender:
         if not self.sender_email or not self.recipients or not self.sender_password:
             logger.error("❌ 未设置 EMAIL_SENDER / EMAIL_RECIPIENTS / QQ_EMAIL_PASSWORD")
             return False
-        try:
-            msg = MIMEMultipart("alternative")
-            msg["Subject"] = subject
-            msg["From"] = self.sender_email
-            msg["To"] = ", ".join(self.recipients)
-            html = self.markdown_to_html(md_content)
-            msg.attach(MIMEText(md_content, "plain", "utf-8"))
-            msg.attach(MIMEText(html, "html", "utf-8"))
-            context = ssl.create_default_context()
-            with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
-                server.ehlo()
-                server.starttls(context=context)
-                server.login(self.sender_email, self.sender_password)
-                server.sendmail(self.sender_email, self.recipients, msg.as_bytes())
-            logger.info(f"✅ 邮件发送成功 → {self.recipients}")
-            return True
-        except Exception as e:
-            logger.error(f"❌ 邮件发送失败: {e}")
-            return False
+        import time
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"] = self.sender_email
+        msg["To"] = ", ".join(self.recipients)
+        html = self.markdown_to_html(md_content)
+        msg.attach(MIMEText(md_content, "plain", "utf-8"))
+        msg.attach(MIMEText(html, "html", "utf-8"))
+        for attempt in range(3):
+            try:
+                context = ssl.create_default_context()
+                with smtplib.SMTP_SSL(self.smtp_server, 465, context=context) as server:
+                    server.login(self.sender_email, self.sender_password)
+                    server.sendmail(self.sender_email, self.recipients, msg.as_bytes())
+                logger.info(f"✅ 邮件发送成功 → {self.recipients}")
+                return True
+            except Exception as e:
+                if attempt < 2:
+                    logger.warning(f"⚠️ 邮件发送失败，重试 {attempt+1}/2: {e}"); time.sleep(3)
+                else:
+                    logger.error(f"❌ 邮件发送失败: {e}")
+                    return False
