@@ -33,9 +33,9 @@ npx skills add obra/superpowers -y -g
 # 3. Install curated open-source skills
 echo ""
 echo "[3/4] Installing curated open-source skills..."
-# Add more as needed:
-# npx skills add <owner>/<repo> -y -g
-echo "No additional open-source skills configured. Edit install.sh to add."
+npx skills add anthropics/skills -y -g || echo "  (already installed or skipped)"
+npx skills add larksuite/cli -y -g || echo "  (already installed or skipped)"
+npx skills add google-gemini/gemini-cli -y -g || echo "  (already installed or skipped)"
 
 # 4. Install Python dependencies
 echo ""
