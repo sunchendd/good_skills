@@ -46,8 +46,9 @@ npx skills add obra/superpowers -y -g || echo "  (obra/superpowers skipped)"
 # Gemini CLI
 npx skills add google-gemini/gemini-cli -y -g || echo "  (gemini-cli skipped)"
 
+npx skills add ascend/agent-skills -y -g || echo "  (ascend/agent-skills skipped)"
 # ByteDance Volcano Engine: image & video generation
-npx skills add volcengine/ai-arena-tools -y -g || echo "  (volcengine skipped)"
+#npx skills add volcengine/ai-arena-tools -y -g || echo "  (volcengine skipped)"
 
 # 4. Install Python dependencies
 echo ""
