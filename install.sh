@@ -33,9 +33,21 @@ npx skills add obra/superpowers -y -g
 # 3. Install curated open-source skills
 echo ""
 echo "[3/4] Installing curated open-source skills..."
-npx skills add anthropics/skills -y -g || echo "  (already installed or skipped)"
-npx skills add larksuite/cli -y -g || echo "  (already installed or skipped)"
-npx skills add google-gemini/gemini-cli -y -g || echo "  (already installed or skipped)"
+
+# Anthropic official skills: brainstorming, frontend-design, mcp-builder, tdd, agent-browser, etc.
+npx skills add anthropics/skills -y -g || echo "  (anthropics/skills skipped)"
+
+# Lark/飞书 full suite: 25+ skills (calendar, doc, im, base, approval, etc.)
+npx skills add larksuite/cli -y -g || echo "  (larksuite/cli skipped)"
+
+# Superpowers dev workflows: tdd, brainstorming, executing-plans, writing-plans, etc.
+npx skills add obra/superpowers -y -g || echo "  (obra/superpowers skipped)"
+
+# Gemini CLI
+npx skills add google-gemini/gemini-cli -y -g || echo "  (gemini-cli skipped)"
+
+# ByteDance Volcano Engine: image & video generation
+npx skills add volcengine/ai-arena-tools -y -g || echo "  (volcengine skipped)"
 
 # 4. Install Python dependencies
 echo ""
