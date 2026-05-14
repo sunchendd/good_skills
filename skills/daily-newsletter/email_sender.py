@@ -152,55 +152,54 @@ class EmailSender:
             if item.strip()
         ]
         
-        try:
-            if not self.sender_email or not to_emails or not self.sender_password:
-                logger.error("未设置 EMAIL_SENDER / EMAIL_RECIPIENTS / QQ_EMAIL_PASSWORD")
-                return False
-                
-            # 读取早报内容
-            if not newsletter_path.exists():
-                logger.error(f"早报文件不存在: {newsletter_path}")
-                return False
-                
-            with open(newsletter_path, 'r', encoding='utf-8') as f:
-                markdown_content = f.read()
-            
-            # 转换为HTML
-            html_content = self.markdown_to_html(markdown_content)
-            
-            # 创建邮件
-            msg = MIMEMultipart('alternative')
-            
-            # 设置邮件头
-            date_str = datetime.datetime.now().strftime('%Y年%m月%d日')
-            subject = f"{subject_prefix}每日科技早报 - {date_str}"
-            
-            from email.header import Header
-            msg['Subject'] = str(Header(subject, 'utf-8'))
-            msg['From'] = self.sender_email
-            msg['To'] = ", ".join(to_emails)
-            msg['Date'] = datetime.datetime.now().strftime('%a, %d %b %Y %H:%M:%S %z')
-            
-            # 添加纯文本和HTML版本
-            msg.attach(MIMEText(markdown_content, 'plain', 'utf-8'))
-            msg.attach(MIMEText(html_content, 'html', 'utf-8'))
-            
-            logger.info(f"正在发送邮件到 {', '.join(to_emails)}...")
-            import time
-            for attempt in range(3):
-                try:
-                    context = ssl.create_default_context()
-                    with smtplib.SMTP_SSL(self.smtp_server, 465, context=context) as server:
-                        server.login(self.sender_email, self.sender_password)
-                        server.send_message(msg, to_addrs=to_emails)
-                    logger.info("✅ 邮件发送成功！")
-                    return True
-                except Exception as e:
-                    if attempt < 2:
-                        logger.warning(f"⚠️ 邮件发送失败，重试 {attempt+1}/2: {e}"); time.sleep(3)
-                    else:
-                        logger.error(f"❌ 邮件发送失败: {e}")
-                        return False
+        if not self.sender_email or not to_emails or not self.sender_password:
+            logger.error("未设置 EMAIL_SENDER / EMAIL_RECIPIENTS / QQ_EMAIL_PASSWORD")
+            return False
+
+        # 读取早报内容
+        if not newsletter_path.exists():
+            logger.error(f"早报文件不存在: {newsletter_path}")
+            return False
+
+        with open(newsletter_path, 'r', encoding='utf-8') as f:
+            markdown_content = f.read()
+
+        # 转换为HTML
+        html_content = self.markdown_to_html(markdown_content)
+
+        # 创建邮件
+        msg = MIMEMultipart('alternative')
+
+        # 设置邮件头
+        date_str = datetime.datetime.now().strftime('%Y年%m月%d日')
+        subject = f"{subject_prefix}每日科技早报 - {date_str}"
+
+        from email.header import Header
+        msg['Subject'] = str(Header(subject, 'utf-8'))
+        msg['From'] = self.sender_email
+        msg['To'] = ", ".join(to_emails)
+        msg['Date'] = datetime.datetime.now().strftime('%a, %d %b %Y %H:%M:%S %z')
+
+        # 添加纯文本和HTML版本
+        msg.attach(MIMEText(markdown_content, 'plain', 'utf-8'))
+        msg.attach(MIMEText(html_content, 'html', 'utf-8'))
+
+        logger.info(f"正在发送邮件到 {', '.join(to_emails)}...")
+        import time
+        for attempt in range(3):
+            try:
+                context = ssl.create_default_context()
+                with smtplib.SMTP_SSL(self.smtp_server, 465, context=context) as server:
+                    server.login(self.sender_email, self.sender_password)
+                    server.send_message(msg, to_addrs=to_emails)
+                logger.info("✅ 邮件发送成功！")
+                return True
+            except Exception as e:
+                if attempt < 2:
+                    logger.warning(f"⚠️ 邮件发送失败，重试 {attempt+1}/2: {e}"); time.sleep(3)
+                else:
+                    logger.error(f"❌ 邮件发送失败: {e}")
+                    return False
     
     def test_connection(self) -> bool:
         """测试邮箱连接"""

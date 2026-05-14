@@ -15,24 +15,52 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 CATEGORIES = ["cs.AI", "cs.LG", "cs.CL", "cs.CV", "cs.RO"]
-MAX_FETCH = 100
-BATCH_SIZE = 20
+MAX_FETCH = 15
+MAX_OUTPUT = 3
+BATCH_SIZE = 15
 MIN_SCORE = 0.6
 DEEPSEEK_MODEL = "deepseek-chat"
 OUTPUT_DIR = Path(__file__).parent / "newsletters"
+HISTORY_FILE = Path(__file__).parent / "newsletters" / ".history.json"
+
+def load_history():
+    try:
+        if HISTORY_FILE.exists():
+            return set(json.loads(HISTORY_FILE.read_text()))
+    except Exception:
+        pass
+    return set()
+
+def save_history(ids):
+    try:
+        HISTORY_FILE.parent.mkdir(parents=True, exist_ok=True)
+        HISTORY_FILE.write_text(json.dumps(list(ids), ensure_ascii=False))
+    except Exception:
+        pass
 
 
 def fetch_arxiv_papers(max_results=MAX_FETCH):
+    keywords = "%22speculative+decoding%22+OR+%22draft+model%22+OR+%22speculative+inference%22+OR+%22parallel+decoding%22+OR+%22lookahead+decoding%22+OR+%22multi-token+prediction%22"
     cat_query = "+OR+".join(f"cat:{c}" for c in CATEGORIES)
-    url = (f"http://export.arxiv.org/api/query?search_query={cat_query}"
+    url = (f"http://export.arxiv.org/api/query?search_query=({cat_query})+AND+({keywords})"
            f"&start=0&max_results={max_results}&sortBy=submittedDate&sortOrder=descending")
-    logger.info(f"📡 抓取 arXiv 论文 (max={max_results})...")
-    try:
-        req = urllib.request.urlopen(url, timeout=60)
-        data = req.read()
-    except Exception as e:
-        logger.error(f"arXiv API 请求失败: {e}")
-        return []
+    logger.info(f"📡 抓取 arXiv 论文 (max={max_results}, 投机推理)...")
+    for attempt in range(3):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "arxiv-daily-bot/1.0"})
+            req = urllib.request.urlopen(req, timeout=30)
+            data = req.read()
+            logger.info(f"✅ 抓取成功，{len(data)} 字节")
+            break
+        except Exception as e:
+            error_msg = str(e)
+            if attempt < 2:
+                wait = 20 * (attempt + 1)
+                logger.warning(f"arXiv API 第 {attempt+1} 次失败，{wait}s 后重试")
+                time.sleep(wait)
+            else:
+                logger.error(f"arXiv API 连续 3 次请求失败: {error_msg[:100]}")
+                return []
     ns = {'atom': 'http://www.w3.org/2005/Atom'}
     root = ET.fromstring(data)
     papers = []
@@ -53,23 +81,24 @@ def fetch_arxiv_papers(max_results=MAX_FETCH):
 def select_papers_with_deepseek(papers):
     client = OpenAI(api_key=os.environ["DEEPSEEK_API_KEY"], base_url="https://api.deepseek.com")
     selected = []
-    for i in range(0, len(papers), BATCH_SIZE):
-        batch = papers[i:i + BATCH_SIZE]
-        logger.info(f"🤖 DeepSeek 处理第 {i//BATCH_SIZE + 1} 批 ({len(batch)} 篇)...")
-        papers_text = "\n\n".join([
-            f"[{j+1}] Title: {p['title']}\nPublished: {p['published']}\n"
-            f"Categories: {', '.join(p['categories'][:3])}\nAbstract: {p['summary'][:500]}\nLink: {p['link']}"
-            for j, p in enumerate(batch)
-        ])
-        prompt = f"""你是 AI 科研论文评审专家。对以下 arXiv 论文逐篇评分筛选。
+    if not papers:
+        return selected
+    batch = papers
+    logger.info(f"🤖 DeepSeek 评分 {len(batch)} 篇论文...")
+    papers_text = "\n\n".join([
+        f"[{j+1}] Title: {p['title']}\nPublished: {p['published']}\n"
+        f"Categories: {', '.join(p['categories'][:3])}\nAbstract: {p['summary'][:800]}\nLink: {p['link']}"
+        for j, p in enumerate(batch)
+    ])
+    prompt = f"""你是 LLM 推理加速领域的论文评审专家。请对以下「投机推理/投机解码」相关论文逐篇评分。
 
 评分标准（0.0-1.0）：
-- 创新性：新方法/新框架/新发现（35%）
-- 实用性：对 LLM/Agent/推理/多模态等热门方向的直接价值（30%）
-- 影响力潜力（20%）
-- 完整性（15%）
+- 创新性：新方法/新架构/新发现（40%）
+- 实用性：对大模型推理加速的直接价值（35%）
+- 影响力潜力（15%）
+- 完整性（10%）
 
-**保留评分 >= {MIN_SCORE} 的所有论文**，数量不限，尽量全面。
+研究方向归类（优先匹配）：投机解码 / 投机推理 / 草稿模型 / MTP / 前缀缓存 / 并行解码
 
 输出 JSON：
 {{
@@ -78,37 +107,36 @@ def select_papers_with_deepseek(papers):
       "original_index": 原始序号,
       "score": 0.85,
       "zh_title": "中文标题",
-      "zh_abstract": "中文摘要150-200字，突出核心创新、方法和结论",
+      "zh_abstract": "中文摘要150-200字，突出核心创新和实验结论",
       "zh_tags": ["标签1", "标签2"],
       "highlight": "一句话亮点（20字内）",
-      "direction": "研究方向（LLM推理/多模态/Agent/训练优化/安全对齐/具身智能/代码生成/其他）"
+      "direction": "研究方向"
     }}
   ]
 }}
 
 论文列表：
 {papers_text}"""
-        try:
-            resp = client.chat.completions.create(
-                model=DEEPSEEK_MODEL,
-                messages=[{"role": "user", "content": prompt}],
-                response_format={"type": "json_object"},
-                timeout=120,
-            )
-            result = json.loads(resp.choices[0].message.content)
-            batch_selected = result.get("selected", [])
-            for item in batch_selected:
-                idx = item.get("original_index", 1) - 1
-                if 0 <= idx < len(batch):
-                    orig = batch[idx]
-                    item.update({'en_title': orig['title'], 'link': orig['link'],
-                                 'published': orig['published'], 'authors': orig['authors'],
-                                 'categories': orig['categories']})
-                    selected.append(item)
-            logger.info(f"   → 本批入选 {len(batch_selected)} 篇")
-            time.sleep(1)
-        except Exception as e:
-            logger.error(f"   ❌ DeepSeek 处理失败: {e}")
+    try:
+        resp = client.chat.completions.create(
+            model=DEEPSEEK_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"},
+            timeout=120,
+        )
+        result = json.loads(resp.choices[0].message.content)
+        batch_selected = result.get("selected", [])
+        for item in batch_selected:
+            idx = item.get("original_index", 1) - 1
+            if 0 <= idx < len(batch):
+                orig = batch[idx]
+                item.update({'en_title': orig['title'], 'link': orig['link'],
+                             'published': orig['published'], 'authors': orig['authors'],
+                             'categories': orig['categories']})
+                selected.append(item)
+        logger.info(f"   → 入选 {len(batch_selected)} 篇")
+    except Exception as e:
+        logger.error(f"   ❌ DeepSeek 处理失败: {e}")
     selected.sort(key=lambda x: x.get('score', 0), reverse=True)
     logger.info(f"✅ 共精选 {len(selected)} 篇论文")
     return selected

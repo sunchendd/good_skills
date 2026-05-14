@@ -16,7 +16,7 @@ from pathlib import Path
 # 将当前目录加入路径
 sys.path.insert(0, str(Path(__file__).parent))
 
-from arxiv_fetcher import fetch_arxiv_papers, select_papers_with_deepseek, format_newsletter, save_newsletter
+from arxiv_fetcher import fetch_arxiv_papers, select_papers_with_deepseek, format_newsletter, save_newsletter, load_history, save_history
 from email_sender import EmailSender
 from bark_client import bark_notify
 
@@ -27,22 +27,33 @@ logger = logging.getLogger(__name__)
 def main():
     test_mode = "--test" in sys.argv
     no_send = "--no-send" in sys.argv
-    max_fetch = 20 if test_mode else 30
-    max_output = 5  # 每日推送论文数量
+    max_fetch = 10 if test_mode else 15
+    max_output = 3  # 每日推送论文数量
 
     logger.info("=" * 60)
     logger.info("🔬 arXiv AI 论文每日精选 开始运行")
-    logger.info(f"   模式: {'测试' if test_mode else '正常'} | 最大抓取: {max_fetch}")
+    logger.info(f"   模式: {'测试' if test_mode else '正常'} | 最大抓取: {max_fetch} | 输出: {max_output}")
     logger.info("=" * 60)
 
     import time
     t0 = time.time()
+
+    # 0. 加载历史，去重
+    history = load_history()
+    logger.info(f"📚 已加载 {len(history)} 篇历史论文")
 
     # 1. 抓取
     papers = fetch_arxiv_papers(max_results=max_fetch)
     if not papers:
         logger.error("❌ 未抓取到论文，退出")
         sys.exit(1)
+
+    # 去除历史重复
+    papers = [p for p in papers if p['link'] not in history]
+    logger.info(f"🔍 去重后剩余 {len(papers)} 篇")
+    if not papers:
+        logger.warning("⚠️ 全是历史重复论文，退出")
+        sys.exit(0)
 
     # 2. 精选（DeepSeek）
     selected = select_papers_with_deepseek(papers)
@@ -56,6 +67,12 @@ def main():
 
     # 4. 保存
     filepath = save_newsletter(content)
+
+    # 更新历史
+    new_ids = {p['link'] for p in selected}
+    history.update(new_ids)
+    save_history(history)
+    logger.info(f"📚 已更新历史（+{len(new_ids)} 篇，总计 {len(history)}）")
 
     # 5. 打印摘要
     today = datetime.datetime.now().strftime("%Y年%m月%d日")
