@@ -15,6 +15,7 @@
     "skills/**/*.txt",
     "skills/**/*.sh",
     "install.sh",
+    "install-remote.sh",
     "CLAUDE.md",
     ".env.example"
   ],
