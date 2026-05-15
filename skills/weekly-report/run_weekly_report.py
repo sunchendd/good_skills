@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 每周报告生成器 - 每周六自动运行
-数据来源：macOS日历(icalBuddy) + 思源笔记 + GitHub动态 + 各skill输出
+数据来源：macOS日历(icalBuddy) + GitHub动态 + 各skill输出
 生成：结构化周报 + 时间分析 + 未完成任务 + 下周规划建议
 """
 import subprocess, urllib.request, json, os, sys, re, logging, datetime
@@ -12,16 +12,9 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-try:
-    from shared.siyuan import save_named_automation_report
-except Exception:
-    save_named_automation_report = None
-
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-SIYUAN_HOST = os.environ.get("SIYUAN_HOST", "http://127.0.0.1:6806")
-SIYUAN_TOKEN = os.environ.get("SIYUAN_TOKEN", "")
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
 OUTPUT_DIR = Path(__file__).parent / "reports"
 
@@ -89,26 +82,6 @@ def get_reminders() -> list[dict]:
     return reminders
 
 
-def get_siyuan_week_notes() -> list[dict]:
-    """读取本周在思源笔记创建的文档"""
-    notes = []
-    try:
-        start_str = week_start.strftime("%Y%m%d") + "000000"
-        end_str = week_end.strftime("%Y%m%d") + "235959"
-        req = urllib.request.Request(
-            f"{SIYUAN_HOST}/api/query/sql",
-            data=json.dumps({"stmt": f"SELECT id, content, box, path, created FROM blocks WHERE type='d' AND created >= '{start_str}' AND created <= '{end_str}' ORDER BY created DESC LIMIT 50"}).encode(),
-            headers={"Authorization": f"Token {SIYUAN_TOKEN}", "Content-Type": "application/json"}
-        )
-        with urllib.request.urlopen(req, timeout=10) as r:
-            result = json.loads(r.read())
-        notes = result.get("data", [])
-        logger.info(f"✅ 思源本周笔记: {len(notes)} 条")
-    except Exception as e:
-        logger.warning(f"思源读取失败: {e}")
-    return notes
-
-
 def get_github_week_activity() -> dict:
     """本周 GitHub 动态汇总"""
     activity = {"vllm_releases": [], "deepseek_repos": [], "events": []}
@@ -174,7 +147,6 @@ def generate_weekly_report_ai(data: dict) -> str:
     cal_text = "\n".join([f"- {e.get('time','')} {e['title']} {e.get('calendar','')}" for e in data['calendar'][:30]]) or "（无日历数据）"
     rem_text_done = "\n".join([f"- ✅ {r['title']}" for r in data['reminders'] if r['completed']][:20]) or "（无）"
     rem_text_todo = "\n".join([f"- ⬜ {r['title']} (到期:{r.get('due','')[:10]})" for r in data['reminders'] if not r['completed']][:20]) or "（无）"
-    notes_text = "\n".join([f"- {n.get('content','无标题')[:50]}" for n in data['notes'][:20]]) or "（无）"
     github_text = f"vLLM-Ascend: {data['github'].get('vllm_releases', [])} | PR数: {data['github'].get('pr_count',0)}"
     skill_text = "\n".join([f"- {v['label']}: {v['count']}天有记录" for v in data['skills'].values()])
 
@@ -191,9 +163,6 @@ def generate_weekly_report_ai(data: dict) -> str:
 ## 未完成提醒事项
 {rem_text_todo}
 
-## 本周思源笔记（{len(data['notes'])}条新建）
-{notes_text}
-
 ## GitHub 动态
 {github_text}
 
@@ -209,7 +178,7 @@ def generate_weekly_report_ai(data: dict) -> str:
 （结合日历+提醒事项，分类整理）
 
 ### 📝 本周学习与积累
-（结合思源笔记数量、arXiv论文、vibe coding等）
+（结合arXiv论文、vibe coding等）
 
 ### ⚠️ 未完成 & 遗留事项
 （列出未完成的任务，评估紧急程度）
@@ -252,33 +221,11 @@ def format_full_report(ai_content: str, data: dict) -> str:
         "## 📎 数据附录",
         f"- 日历事件：{len(data['calendar'])} 个",
         f"- 提醒事项：完成 {len([r for r in data['reminders'] if r['completed']])} / 未完成 {len([r for r in data['reminders'] if not r['completed']])}",
-        f"- 思源新笔记：{len(data['notes'])} 条",
         f"- GitHub 活动：{data['github'].get('pr_count',0)} 个PR",
         "",
         f"*由 OpenClaw Weekly Report 自动生成 · {WEEK_STR}*",
     ]
     return "\n".join(lines)
-
-
-def save_to_siyuan(content: str):
-    if not save_named_automation_report:
-        logger.warning("共享思源模块不可用，跳过思源写入")
-        return
-    try:
-        doc_name = f"{week_start.strftime('%Y-%m-%d')}_W{WEEK_NUM:02d}"
-        result = save_named_automation_report(
-            route_key="weekly_report",
-            markdown=content,
-            doc_name=doc_name,
-            title=f"第{WEEK_NUM}周周报",
-        )
-        logger.info(
-            "✅ 思源周报已创建: /Efficiency Review/Weekly Report/%s (%s)",
-            doc_name,
-            result.get("doc_id", ""),
-        )
-    except Exception as e:
-        logger.error(f"❌ 思源失败: {e}")
 
 
 def send_email(content, subject):
@@ -327,7 +274,6 @@ def main():
     data = {
         "calendar": get_calendar_events(),
         "reminders": get_reminders(),
-        "notes": get_siyuan_week_notes(),
         "github": get_github_week_activity(),
         "skills": collect_week_skill_outputs(),
     }
@@ -342,7 +288,6 @@ def main():
 
     if no_send: return
 
-    save_to_siyuan(report)
     send_email(report, f"📋 第{WEEK_NUM}周工作周报 | {WEEK_STR}")
 
     sys.path.insert(0, str(Path(__file__).parent))
@@ -350,7 +295,7 @@ def main():
         from bark_client import bark_notify
         bark_notify(
             title=f"📋 第{WEEK_NUM}周周报已生成",
-            body=f"{WEEK_STR}\n日历{len(data['calendar'])}项 · 笔记{len(data['notes'])}条 · 已写入思源",
+            body=f"{WEEK_STR}\n日历{len(data['calendar'])}项 · 已发送邮件",
             sound="minuet", group="report"
         )
     except Exception as e:

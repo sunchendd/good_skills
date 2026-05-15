@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-每日日志聚合器 → 写入思源笔记
-聚合：GitHub 动态、当日新建思源笔记、今日arXiv/早报/健身/穿搭内容
+每日日志聚合器
+聚合：GitHub 动态、今日arXiv/早报/健身/穿搭内容
 """
 import urllib.request, json, os, sys, logging, datetime
 from pathlib import Path
@@ -11,70 +11,14 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-try:
-    from shared.siyuan import save_named_automation_report
-except Exception:
-    save_named_automation_report = None
-
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-SIYUAN_HOST = os.environ.get("SIYUAN_HOST", "http://127.0.0.1:6806")
-SIYUAN_TOKEN = os.environ.get("SIYUAN_TOKEN", "")
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
 DEEPSEEK_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
 
 TODAY = datetime.date.today().strftime("%Y-%m-%d")
 TODAY_ZH = datetime.datetime.now().strftime("%Y年%m月%d日")
-
-
-# ── 思源 API ──────────────────────────────────────────────────────────────────
-def siyuan_post(path: str, data: dict) -> dict:
-    url = f"{SIYUAN_HOST}{path}"
-    body = json.dumps(data).encode()
-    req = urllib.request.Request(url, data=body, headers={
-        "Authorization": f"Token {SIYUAN_TOKEN}",
-        "Content-Type": "application/json",
-    })
-    try:
-        with urllib.request.urlopen(req, timeout=15) as r:
-            return json.loads(r.read())
-    except Exception as e:
-        logger.warning(f"思源 API 请求失败 {path}: {e}")
-        return {}
-
-
-def get_today_new_notes() -> list[dict]:
-    """查询今天新建的思源笔记"""
-    try:
-        # 查询今天创建的块
-        ts_start = int(datetime.datetime.combine(datetime.date.today(), datetime.time.min).timestamp())
-        result = siyuan_post("/api/query/sql", {
-            "stmt": "SELECT id, content, root_id, box, path, type, created FROM blocks WHERE type='d' AND created >= '" + datetime.date.today().strftime("%Y%m%d") + "000000' ORDER BY created DESC LIMIT 20" 
-        })
-        notes = []
-        for row in result.get("data", []):
-            notes.append({
-                "id": row.get("id"),
-                "title": row.get("content", "无标题")[:60],
-                "notebook": row.get("box", ""),
-                "path": row.get("path", ""),
-                "created": row.get("created", ""),
-            })
-        logger.info(f"✅ 今日思源新笔记: {len(notes)} 条")
-        return notes
-    except Exception as e:
-        logger.error(f"❌ 思源查询失败: {e}")
-        return []
-
-
-def get_notebooks() -> dict:
-    """获取笔记本 id→name 映射"""
-    try:
-        r = siyuan_post("/api/notebook/lsNotebooks", {})
-        return {nb["id"]: nb["name"] for nb in r.get("data", {}).get("notebooks", [])}
-    except:
-        return {}
 
 
 # ── GitHub 动态 ───────────────────────────────────────────────────────────────
@@ -147,7 +91,7 @@ def read_today_files() -> dict:
 
 
 # ── 生成日志 Markdown ─────────────────────────────────────────────────────────
-def generate_daily_log(notes: list, notebooks: dict, github_events: list, today_files: dict) -> str:
+def generate_daily_log(github_events: list, today_files: dict) -> str:
     now = datetime.datetime.now().strftime("%H:%M")
     weekday = ["周一","周二","周三","周四","周五","周六","周日"][datetime.date.today().weekday()]
 
@@ -160,7 +104,6 @@ def generate_daily_log(notes: list, notebooks: dict, github_events: list, today_
     # 今日概览
     lines += [
         "## 📊 今日概览",
-        f"- 新建笔记：{len(notes)} 条",
         f"- GitHub 动态：{len(github_events)} 条",
         f"- 早报已发送：{'✅' if 'newsletter' in today_files else '❌'}",
         f"- arXiv 论文：{'✅' if 'arxiv' in today_files else '❌'}",
@@ -170,16 +113,6 @@ def generate_daily_log(notes: list, notebooks: dict, github_events: list, today_
         f"- 无语哥选题：{'✅' if 'wuyu' in today_files else '❌'}",
         "", "---", "",
     ]
-
-    # 思源新笔记
-    lines += ["## 📝 今日新建笔记", ""]
-    if notes:
-        for n in notes:
-            nb_name = notebooks.get(n['notebook'], n['notebook'])
-            lines.append(f"- **{n['title']}** `{nb_name}` `siyuan://blocks/{n['id']}`")
-    else:
-        lines.append("- （今日无新建笔记）")
-    lines += ["", "---", ""]
 
     # GitHub 动态
     lines += ["## 🐙 GitHub 动态", ""]
@@ -211,42 +144,15 @@ def generate_daily_log(notes: list, notebooks: dict, github_events: list, today_
     return "\n".join(lines)
 
 
-# ── 写入思源笔记 ──────────────────────────────────────────────────────────────
-def write_to_siyuan(content: str, notebooks: dict) -> str:
-    """在思源笔记中创建每日日志"""
-    if not save_named_automation_report:
-        logger.error("❌ 共享思源模块不可用")
-        return ""
-    try:
-        result = save_named_automation_report(
-            route_key="daily_digest",
-            markdown=content,
-            day=TODAY,
-            title=f"每日汇总 {TODAY}",
-        )
-        doc_id = result.get("doc_id", "")
-        logger.info(
-            "✅ 思源笔记创建成功: /Efficiency Review/Daily Summary/%s (id: %s)",
-            TODAY,
-            doc_id,
-        )
-        return doc_id
-    except Exception as e:
-        logger.error(f"❌ 思源写入失败: {e}")
-        return ""
-
-
 def main():
     logger.info("=" * 50)
     logger.info("📅 每日日志聚合启动")
     logger.info("=" * 50)
 
-    notebooks = get_notebooks()
-    notes = get_today_new_notes()
     github_events = get_github_events()
     today_files = read_today_files()
 
-    content = generate_daily_log(notes, notebooks, github_events, today_files)
+    content = generate_daily_log(github_events, today_files)
     print(content[:2000])
 
     # 保存本地
@@ -254,22 +160,13 @@ def main():
     out_dir.mkdir(exist_ok=True)
     (out_dir / f"daily_{TODAY}.md").write_text(content, encoding='utf-8')
 
-    # 写入思源
-    doc_id = write_to_siyuan(content, notebooks)
-
     # Bark 通知
     sys.path.insert(0, str(Path(__file__).parent))
     try:
         from bark_client import bark_notify
-        # 提取今日新笔记标题作为摘要
-        note_titles = [n.get("content", n.get("title", ""))[:30] for n in notes[:3] if n]
-        bark_lines = [f"📝 新笔记{len(notes)}条  🐙 GitHub{len(github_events)}条"]
-        for t in note_titles:
-            if t:
-                bark_lines.append(f"• {t}")
         bark_notify(
             title=f"📅 {TODAY_ZH} 每日日志已生成",
-            body="\n".join(bark_lines),
+            body=f"🐙 GitHub{len(github_events)}条活动",
             sound="minuet", group="digest"
         )
     except Exception as e:
