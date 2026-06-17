@@ -39,43 +39,88 @@ def save_history(ids):
         pass
 
 
+def _parse_rss_date(pub_date_text):
+    """Parse RSS pubDate like 'Thu, 21 May 2026 00:00:00 -0400' to '2026-05-21'"""
+    from email.utils import parsedate_to_datetime
+    try:
+        dt = parsedate_to_datetime(pub_date_text)
+        return dt.strftime('%Y-%m-%d')
+    except Exception:
+        return ''
+
+
 def fetch_arxiv_papers(max_results=MAX_FETCH):
-    keywords = "%22speculative+decoding%22+OR+%22draft+model%22+OR+%22speculative+inference%22+OR+%22parallel+decoding%22+OR+%22lookahead+decoding%22+OR+%22multi-token+prediction%22"
-    cat_query = "+OR+".join(f"cat:{c}" for c in CATEGORIES)
-    url = (f"http://export.arxiv.org/api/query?search_query=({cat_query})+AND+({keywords})"
-           f"&start=0&max_results={max_results}&sortBy=submittedDate&sortOrder=descending")
-    logger.info(f"📡 抓取 arXiv 论文 (max={max_results}, 投机推理)...")
-    for attempt in range(3):
-        try:
-            req = urllib.request.Request(url, headers={"User-Agent": "arxiv-daily-bot/1.0"})
-            req = urllib.request.urlopen(req, timeout=30)
-            data = req.read()
-            logger.info(f"✅ 抓取成功，{len(data)} 字节")
+    import re
+    keywords_list = ["speculative decoding", "draft model", "speculative inference",
+                     "parallel decoding", "lookahead decoding", "multi-token prediction"]
+    seen_links = set()
+    all_papers = []
+    # First pass: collect all papers with dates, find most recent date
+    raw_papers = []
+
+    logger.info(f"📡 通过 RSS 抓取 arXiv 论文 (投机推理)...")
+    for cat_idx, cat in enumerate(CATEGORIES):
+        rss_url = f"https://rss.arxiv.org/rss/{cat}"
+        logger.info(f"   → [{cat_idx+1}/{len(CATEGORIES)}] {cat}...")
+        for attempt in range(3):
+            try:
+                req = urllib.request.Request(rss_url, headers={"User-Agent": "arxiv-daily-bot/1.0"})
+                data = urllib.request.urlopen(req, timeout=60).read()
+                break
+            except Exception as e:
+                if attempt < 2:
+                    logger.warning(f"  RSS {cat} 失败 (尝试 {attempt+1}/3): {e}")
+                    time.sleep(10)
+                else:
+                    logger.error(f"  RSS {cat} 失败: {e}")
+                    data = None
+        if data is None:
+            continue
+        root = ET.fromstring(data)
+        for item in root.findall('.//item'):
+            title = (item.find('title').text or '').strip().replace('\n', ' ').replace('  ', ' ')
+            link = (item.find('link').text or '').strip()
+            desc = (item.find('description').text or '').strip()
+            desc = re.sub(r'<[^>]+>', ' ', desc).replace('\n', ' ').strip()
+            pub_date_el = item.find('pubDate')
+            published = _parse_rss_date(pub_date_el.text) if pub_date_el is not None else ''
+            if not published:
+                continue
+            creators = item.findall('creator') or item.findall('{http://purl.org/dc/elements/1.1/}creator')
+            authors = [c.text for c in creators[:3] if c.text]
+            ann = item.find('announce_type')
+            cats = [cat]
+            if ann is not None and ann.text == 'cross':
+                cats.append('cross-list')
+            raw_papers.append({'title': title, 'summary': desc[:2000], 'link': link,
+                               'published': published, 'categories': cats, 'authors': authors})
+        time.sleep(3 if cat_idx < len(CATEGORIES) - 1 else 0)
+
+    if not raw_papers:
+        logger.warning("⚠️ RSS 未获取到任何论文")
+        return []
+
+    # Find the most recent date with papers
+    all_dates = sorted(set(p['published'] for p in raw_papers), reverse=True)
+    latest_date = all_dates[0] if all_dates else ''
+    logger.info(f"📅 RSS 最新发布日期: {latest_date} (共 {len(all_dates)} 个日期)")
+
+    # Filter: only papers from the most recent date + keyword match
+    for p in raw_papers:
+        if p['published'] != latest_date:
+            continue
+        text_lower = (p['title'] + ' ' + p['summary']).lower()
+        if not any(kw in text_lower for kw in keywords_list):
+            continue
+        if p['link'] in seen_links:
+            continue
+        seen_links.add(p['link'])
+        all_papers.append(p)
+        if len(all_papers) >= max_results:
             break
-        except Exception as e:
-            error_msg = str(e)
-            if attempt < 2:
-                wait = 20 * (attempt + 1)
-                logger.warning(f"arXiv API 第 {attempt+1} 次失败，{wait}s 后重试")
-                time.sleep(wait)
-            else:
-                logger.error(f"arXiv API 连续 3 次请求失败: {error_msg[:100]}")
-                return []
-    ns = {'atom': 'http://www.w3.org/2005/Atom'}
-    root = ET.fromstring(data)
-    papers = []
-    for entry in root.findall('atom:entry', ns):
-        title = entry.find('atom:title', ns).text.strip().replace('\n', '').replace('  ', ' ')
-        summary = entry.find('atom:summary', ns).text.strip().replace('\n', ' ')
-        link = entry.find('atom:id', ns).text.strip()
-        published = entry.find('atom:published', ns).text[:10]
-        cats = [c.get('term') for c in entry.findall('atom:category', ns)]
-        authors_el = entry.findall('atom:author', ns)
-        authors = [a.find('atom:name', ns).text for a in authors_el[:3]]
-        papers.append({'title': title, 'summary': summary, 'link': link,
-                       'published': published, 'categories': cats, 'authors': authors})
-    logger.info(f"✅ 获取 {len(papers)} 篇论文")
-    return papers
+
+    logger.info(f"✅ 共获取 {len(all_papers)} 篇论文 ({latest_date})")
+    return all_papers
 
 
 def select_papers_with_deepseek(papers):
