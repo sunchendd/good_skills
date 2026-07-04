@@ -26,7 +26,6 @@
     "./skills/patent-specialist",
     "./skills/siyuan-note",
     "./skills/skill-cleanup",
-    "./skills/xhs-skill",
-    "./skills/shared"
+    "./skills/xhs-skill"
   ]
 }
