@@ -1,0 +1,32 @@
+{
+  "name": "good-skills",
+  "description": "Self-developed AI agent skills with Python automation — daily newsletters, arXiv papers, fitness plans, wardrobe advice, GitHub monitoring, and more. Includes coding-guidelines skill for reducing common LLM coding mistakes.",
+  "version": "1.0.2",
+  "author": {
+    "name": "sunchendd"
+  },
+  "license": "MIT",
+  "keywords": ["ai", "productivity", "daily-newsletter", "bark", "automation", "coding-guidelines"],
+  "skills": [
+    "./skills/coding-guidelines",
+    "./skills/arxiv-daily",
+    "./skills/daily-digest",
+    "./skills/daily-newsletter",
+    "./skills/dev-workflow",
+    "./skills/find-skills",
+    "./skills/github-watcher",
+    "./skills/humanizer-zh",
+    "./skills/patent-search",
+    "./skills/patent-specialist",
+    "./skills/siyuan-note",
+    "./skills/skill-cleanup",
+    "./skills/skill-creator",
+    "./skills/super-fitness",
+    "./skills/super-wardrobe",
+    "./skills/vibe-daily",
+    "./skills/vllm-dev",
+    "./skills/vllm-test",
+    "./skills/weekly-report",
+    "./skills/xhs-skill"
+  ]
+}

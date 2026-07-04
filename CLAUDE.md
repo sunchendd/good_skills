@@ -1,87 +1,65 @@
-# Good Skills
+# CLAUDE.md
 
-Self-developed AI agent skills with Python automation. Skills are in `skills/` subdirectories.
+Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
 
-## Setup
+**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
-```bash
-./install.sh          # One-time setup
-cp .env.example .env  # Fill in API keys
+## 1. Think Before Coding
+
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
+
+Before implementing:
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them - don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
+
+## 2. Simplicity First
+
+**Minimum code that solves the problem. Nothing speculative.**
+
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
+
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+## 3. Surgical Changes
+
+**Touch only what you must. Clean up only your own mess.**
+
+When editing existing code:
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it - don't delete it.
+
+When your changes create orphans:
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
+
+The test: Every changed line should trace directly to the user's request.
+
+## 4. Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform tasks into verifiable goals:
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
+
+For multi-step tasks, state a brief plan:
+```
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
 ```
 
-## Running Skills
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-```bash
-# Via wrapper (recommended) - auto-loads .env
-scripts/run_skill.sh skills/<name>/run_<name>.py
+---
 
-# Via npm scripts
-npm run fitness | wardrobe | newsletter | arxiv | vibe | weekly | digest
-
-# Via npx (no install)
-npx good-skills run <name>
-```
-
-**Always use `python3`, never `python`** (not available on this system).
-
-## Project Structure
-
-```
-skills/<name>/
-  run_<name>.py   # Entry point
-  SKILL.md        # Skill metadata (name + description frontmatter)
-  *.py            # Supporting modules
-scripts/
-  run_skill.sh    # Wrapper: loads .env + runs python3
-  archive.sh      # Archive generated outputs to archive/YYYY-MM/
-```
-
-## Conventions
-
-- Commits: Conventional Commits (`type(scope): subject`)
-- Naming: lowercase with hyphens (e.g., `daily-newsletter`)
-- Skills: SKILL.md with `name` + `description` frontmatter (skills.sh standard)
-
-## Environment Variables
-
-Loaded from `.env` (auto-loaded by `run_skill.sh`) and exported in `~/.zshrc`:
-
-| Variable | Description |
-|----------|-------------|
-| `DEEPSEEK_API_KEY` | LLM API |
-| `GITHUB_TOKEN` | GitHub API |
-| `BARK_TOKEN` | iOS push notifications |
-| `EMAIL_SENDER` | QQ Mail sender (`995943586@qq.com`) |
-| `EMAIL_RECIPIENTS` | Recipient (`sunchend@outlook.com`) |
-| `QQ_EMAIL_PASSWORD` | QQ Mail SMTP auth code |
-| `SIYUAN_HOST` | SiYuan Notes API host |
-| `SIYUAN_TOKEN` | SiYuan Notes API token |
-
-## Scheduled Tasks (LaunchAgent)
-
-Daily tasks run via macOS LaunchAgent (more reliable than cron on macOS):
-
-| Time | Task |
-|------|------|
-| 06:30 | super-fitness |
-| 06:35 | super-wardrobe |
-| 06:40 | daily-newsletter |
-| 07:00 | arxiv-daily |
-| 07:30 | vibe-daily |
-| 09/12/15/18/21:00 | github-watcher |
-| 22:50 | archive |
-| 23:00 | daily-digest |
-| Sat 20:00 | weekly-report |
-
-Manage with:
-```bash
-launchctl start com.goodskills.<name>   # trigger manually
-launchctl list | grep goodskills        # check status
-cat /tmp/good-skills-<name>.log         # view logs
-```
-
-## Output & Archive
-
-Generated files are gitignored and archived nightly to `archive/YYYY-MM/`:
-- `skills/*/newsletters/` `skills/*/outfits/` `skills/*/daily_tasks/`
-- `skills/*/reports/` `skills/*/logs/`
+**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.

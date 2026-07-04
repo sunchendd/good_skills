@@ -1,0 +1,35 @@
+{
+  "name": "good-skills",
+  "id": "good-skills",
+  "owner": {
+    "name": "sunchendd"
+  },
+  "metadata": {
+    "description": "Self-developed AI agent skills with Python automation — daily newsletters, arXiv papers, fitness plans, wardrobe advice, GitHub monitoring, coding guidelines, and more. 20+ skills covering productivity, health, knowledge management, and developer workflows.",
+    "version": "1.0.2"
+  },
+  "plugins": [
+    {
+      "name": "good-skills",
+      "source": "./",
+      "description": "20+ AI agent skills: coding-guidelines (4 principles to reduce LLM mistakes), daily-newsletter (27+ RSS sources), arxiv-daily (paper scoring), super-fitness (personalized plans), super-wardrobe (weather-based outfits), github-watcher, vibe-daily, dev-workflow, patent tools, and more.",
+      "version": "1.0.2",
+      "author": {
+        "name": "sunchendd"
+      },
+      "keywords": [
+        "ai",
+        "productivity",
+        "automation",
+        "newsletter",
+        "fitness",
+        "wardrobe",
+        "arxiv",
+        "github",
+        "coding-guidelines",
+        "patent"
+      ],
+      "category": "automation"
+    }
+  ]
+}

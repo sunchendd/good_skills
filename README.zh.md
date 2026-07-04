@@ -1,8 +1,15 @@
 # Good Skills
 
-自研 AI Agent 技能集合，含 Python 自动化脚本与定时推送（邮件 + Bark）。
+自研 AI Agent 技能集合，含 Python 自动化与定时推送（邮件 + Bark）。
 
-## 自研技能
+## 安装
+
+```bash
+/plugin marketplace add sunchendd/good-skills
+/plugin install good-skills@good-skills
+```
+
+## 技能列表
 
 ### 每日推送
 
@@ -13,7 +20,7 @@
 | [vibe-daily](skills/vibe-daily/) | 每日 AI 编程工具动态，Cursor/Claude Code/Copilot 更新和技巧 |
 | [super-wardrobe](skills/super-wardrobe/) | 每日穿搭建议，自动获取杭州天气，AI 搭配上衣/裤子/鞋/帽子/配色 |
 | [super-fitness](skills/super-fitness/) | 科学减脂计划，每日 AI 生成个性化运动+饮食方案 |
-| [github-watcher](skills/github-watcher/) | GitHub 仓库监控，vllm-ascend 新版本、DeepSeek 新仓库、vLLM 有价值 PR，Bark 通知 |
+| [github-watcher](skills/github-watcher/) | GitHub 仓库监控，vllm-ascend 新版本、DeepSeek 新仓库、vLLM 有价值 PR |
 
 ### 总结与报告
 
@@ -27,8 +34,8 @@
 | 技能 | 说明 |
 |------|------|
 | [vllm-dev](skills/vllm-dev/) | vLLM 推理引擎开发，推测解码(Eagle3/MTP)、KV Cache 优化、Attention Backend |
-| [vllm-test](skills/vllm-test/) | vLLM 性能测试，基准测试、吞吐/延迟对比、evalscope 集成 |
-| [dev-workflow](dev-workflow/) | 通用开发验证工作流，支持 Ascend NPU/GPU，vLLM/MindIE 引擎 |
+| [vllm-test](skills/vllm-test/) | vLLM 性能测试，基准测试、吞吐/延迟对比 |
+| [dev-workflow](skills/dev-workflow/) | 通用开发验证工作流，支持 Ascend NPU/GPU，vLLM/MindIE 引擎 |
 
 ### 知识管理
 
@@ -39,24 +46,21 @@
 | [xhs-skill](skills/xhs-skill/) | 小红书检索与发布，基于 MCP Server |
 | [humanizer-zh](skills/humanizer-zh/) | 中文去 AI 痕迹，24 种模式检测与修复 |
 
+### 编码规范
+
+| 技能 | 说明 |
+|------|------|
+| [coding-guidelines](skills/coding-guidelines/) | 减少 LLM 编码失误的行为准则，源自 Andrej Karpathy 的观察 |
+
 ### 技能管理
 
 | 技能 | 说明 |
 |------|------|
 | [find-skills](skills/find-skills/) | 技能发现与安装指南 |
-| [skill-creator](skills/skill-creator/) | 技能创建指南，结构/frontmatter/最佳实践 |
+| [skill-creator](skills/skill-creator/) | 技能创建指南 |
 | [skill-cleanup](skills/skill-cleanup/) | 清理失效 skill 符号链接 |
 
-## 安装
-
-```bash
-/plugin marketplace add sunchendd/good-skills
-/plugin install good-skills@good-skills
-```
-
 ## 环境变量
-
-在 `.env` 中配置（参考 `.env.example`）：
 
 | 变量 | 说明 |
 |------|------|
