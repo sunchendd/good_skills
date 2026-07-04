@@ -1,32 +1,32 @@
 {
   "name": "good-skills",
-  "description": "Self-developed AI agent skills with Python automation — daily newsletters, arXiv papers, fitness plans, wardrobe advice, GitHub monitoring, and more. Includes coding-guidelines skill for reducing common LLM coding mistakes.",
-  "version": "1.0.2",
+  "description": "AI agent skills collection — coding guidelines, Claude API reference, document processing, MCP builder, daily automation, patent tools, and more.",
+  "version": "1.0.3",
   "author": {
     "name": "sunchendd"
   },
   "license": "MIT",
-  "keywords": ["ai", "productivity", "daily-newsletter", "bark", "automation", "coding-guidelines"],
+  "keywords": ["ai", "claude-code", "skills", "automation", "coding-guidelines"],
   "skills": [
     "./skills/coding-guidelines",
+    "./skills/claude-api",
+    "./skills/mcp-builder",
+    "./skills/doc-coauthoring",
+    "./skills/skill-creator",
+    "./skills/xlsx",
+    "./skills/pdf",
+    "./skills/docx",
     "./skills/arxiv-daily",
-    "./skills/daily-digest",
     "./skills/daily-newsletter",
-    "./skills/dev-workflow",
-    "./skills/find-skills",
+    "./skills/vibe-daily",
     "./skills/github-watcher",
+    "./skills/find-skills",
     "./skills/humanizer-zh",
     "./skills/patent-search",
     "./skills/patent-specialist",
     "./skills/siyuan-note",
     "./skills/skill-cleanup",
-    "./skills/skill-creator",
-    "./skills/super-fitness",
-    "./skills/super-wardrobe",
-    "./skills/vibe-daily",
-    "./skills/vllm-dev",
-    "./skills/vllm-test",
-    "./skills/weekly-report",
-    "./skills/xhs-skill"
+    "./skills/xhs-skill",
+    "./skills/shared"
   ]
 }
